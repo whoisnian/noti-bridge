@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "556748052828",
+    "project_id": "noti-bridge",
+    "storage_bucket": "noti-bridge.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556748052828:android:42ab361b4821bd29880999",
+        "android_client_info": {
+          "package_name": "com.whoisnian.noti"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556748052828-ap15gba0jeqtjrh3a7qv9ce84cq5ldoj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJSiUTXwn-PgJrnQZnytLRKcqPEN8HE2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "556748052828-ap15gba0jeqtjrh3a7qv9ce84cq5ldoj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
