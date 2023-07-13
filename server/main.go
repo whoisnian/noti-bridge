@@ -1,51 +1,17 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
-	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/messaging"
-	"google.golang.org/api/option"
+	"github.com/whoisnian/noti-bridge/task"
+	"github.com/whoisnian/noti-bridge/transporter"
 )
 
 func main() {
-	ctx := context.Background()
-	opt := option.WithCredentialsFile("service-account.json")
+	transporter.SetupAndroid("service-account.json")
 
-	app, err := firebase.NewApp(ctx, nil, opt)
+	err := transporter.NotifyAndroid(&task.Task{Type: task.TypePing}, "e9KDLKiLTKiRAm1EAj4J_H:APA91bEwwCcUtPxeLu_Dck1FnmvaOyrNxnwEInDOuU1HWQQbVCHFvnhi_hcJrhe5h8IuFAQrbtKuM04ZBLM9dY-n6P1U7rttGs9wweXuerL2ZBoqx969NPqK6LTX-F-UZIr9DT4tpret")
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	client, err := app.Messaging(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	registrationToken := "YOUR_REGISTRATION_TOKEN"
-	ttl := time.Duration(0)
-	message := &messaging.Message{
-		Android: &messaging.AndroidConfig{
-			Priority:              "high",
-			TTL:                   &ttl,
-			RestrictedPackageName: "com.whoisnian.noti",
-			Data: map[string]string{
-				"server": "noti-bridge",
-			},
-			Notification: &messaging.AndroidNotification{
-				Title:    "test",
-				Body:     "send from golang server",
-				Priority: messaging.PriorityHigh,
-			},
-		},
-		Token: registrationToken,
-	}
-
-	response, err := client.Send(ctx, message)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println("success:", response)
 }
