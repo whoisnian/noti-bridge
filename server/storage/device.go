@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/whoisnian/glb/util/osutil"
@@ -16,43 +17,58 @@ type Device struct {
 	CTime time.Time
 }
 
-type DeviceMap map[string][]*Device
+type DeviceMap struct {
+	m      map[string][]*Device
+	locker sync.RWMutex
+}
 
-func (DeviceMap) fName() string {
+func newDeviceMap() *DeviceMap {
+	return &DeviceMap{
+		m: make(map[string][]*Device),
+	}
+}
+
+func (*DeviceMap) fName() string {
 	return "devices.json"
 }
 
-func (m DeviceMap) loadFrom(fPath string) (finerr error) {
+func (m *DeviceMap) loadFrom(fPath string) (finerr error) {
 	fi, err := os.OpenFile(fPath, os.O_RDONLY|os.O_CREATE, osutil.DefaultFileMode)
 	if err != nil {
 		return err
 	}
 	defer fi.Close()
 
+	m.locker.Lock()
+	defer m.locker.Unlock()
+
 	dec := json.NewDecoder(fi)
 	for dec.More() {
 		d := new(Device)
 		if err := dec.Decode(d); err != nil {
-			finerr = err
+			return err
 		} else {
-			m[d.UID] = append(m[d.UID], d)
+			m.m[d.UID] = append(m.m[d.UID], d)
 		}
 	}
 	return finerr
 }
 
-func (m DeviceMap) saveAs(fPath string) (finerr error) {
+func (m *DeviceMap) saveAs(fPath string) (finerr error) {
 	fi, err := os.OpenFile(fPath, os.O_WRONLY|os.O_CREATE, osutil.DefaultFileMode)
 	if err != nil {
 		return err
 	}
 	defer fi.Close()
 
+	m.locker.RLock()
+	defer m.locker.RUnlock()
+
 	enc := json.NewEncoder(fi)
-	for _, dl := range m {
+	for _, dl := range m.m {
 		for _, d := range dl {
 			if err := enc.Encode(d); err != nil {
-				finerr = err
+				return err
 			}
 		}
 	}

@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	gUserMap   = make(UserMap)
-	gDeviceMap = make(DeviceMap)
+	gUserMap   = newUserMap()
+	gDeviceMap = newDeviceMap()
 
 	dataDir string
 )
