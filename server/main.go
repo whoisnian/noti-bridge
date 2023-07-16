@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
+	"net/http"
 
 	"github.com/whoisnian/glb/config"
+	"github.com/whoisnian/glb/logger"
 	"github.com/whoisnian/glb/util/osutil"
 	"github.com/whoisnian/noti-bridge/global"
+	"github.com/whoisnian/noti-bridge/router"
 	"github.com/whoisnian/noti-bridge/storage"
-	"github.com/whoisnian/noti-bridge/task"
 	"github.com/whoisnian/noti-bridge/transporter"
 )
 
@@ -25,13 +29,22 @@ func main() {
 	storage.SetupDataDir(global.CFG.DataPath)
 	transporter.SetupAndroid(global.CFG.CredentialPath)
 
-	err = transporter.NotifyAndroid(&task.Task{Type: task.TypePing}, "e9KDLKiLTKiRAm1EAj4J_H:APA91bEwwCcUtPxeLu_Dck1FnmvaOyrNxnwEInDOuU1HWQQbVCHFvnhi_hcJrhe5h8IuFAQrbtKuM04ZBLM9dY-n6P1U7rttGs9wweXuerL2ZBoqx969NPqK6LTX-F-UZIr9DT4tpret")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	mux := router.Setup()
+	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: logger.Req(logger.Recovery(mux))}
+	go func() {
+		log.Print("Service started: <http://", global.CFG.ListenAddr, ">\n")
+		if err := server.ListenAndServe(); errors.Is(err, http.ErrServerClosed) {
+			log.Println("Service shutting down")
+		} else if err != nil {
+			log.Fatalln(err)
+		}
+	}()
 
 	osutil.WaitForInterrupt()
 
+	if err = server.Shutdown(context.Background()); err != nil {
+		log.Println(err)
+	}
 	if err = storage.Flush(); err != nil {
 		log.Fatalln(err)
 	}

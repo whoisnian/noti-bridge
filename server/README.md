@@ -11,6 +11,8 @@ uid name type token ctime
 * uniq(type, token)
 
 ## api
-* bind: uid, name, type, token
-* unbind: uid, type, token
-* list: uid
+* register: => user
+* bind: uid, name, type, token => ok/err
+* unbind: uid, type, token => ok/err
+* list: uid => devices
+* message: uid, content => ok/err
