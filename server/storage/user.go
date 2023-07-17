@@ -70,3 +70,29 @@ func (m *UserMap) saveAs(fPath string) (finerr error) {
 	}
 	return finerr
 }
+
+func (m *UserMap) Find(uid string) *User {
+	m.locker.RLock()
+	defer m.locker.RUnlock()
+	return m.m[uid]
+}
+
+func (m *UserMap) Create(uid string, ctime time.Time, atime time.Time) {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	m.m[uid] = &User{uid, ctime, atime}
+}
+
+func (m *UserMap) Update(uid string, ctime time.Time, atime time.Time) {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	u := m.m[uid]
+	u.CTime = ctime
+	u.ATime = atime
+}
+
+func (m *UserMap) Delete(uid string) {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	delete(m.m, uid)
+}
