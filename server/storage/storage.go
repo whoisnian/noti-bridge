@@ -4,11 +4,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 var (
 	gGroupMap  = newGroupMap()
 	gDeviceMap = newDeviceMap()
+	gLocker    = new(sync.RWMutex)
 
 	dataDir string
 )
@@ -24,6 +26,9 @@ func SetupDataDir(dir string) {
 		log.Fatalln(err)
 	}
 
+	gLocker.Lock()
+	defer gLocker.Unlock()
+
 	if err = gGroupMap.loadFrom(filepath.Join(dataDir, gGroupMap.fName())); err != nil {
 		log.Fatalln(err)
 	}
@@ -33,6 +38,9 @@ func SetupDataDir(dir string) {
 }
 
 func Flush() error {
+	gLocker.Lock()
+	defer gLocker.Unlock()
+
 	if err := gGroupMap.saveAs(filepath.Join(dataDir, gGroupMap.fName())); err != nil {
 		return err
 	}
