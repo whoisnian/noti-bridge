@@ -1,18 +1,16 @@
 # server
 
 ## storage
-### user
-uid ctime atime
-* uniq(uid)
+### group
+gid ctime atime subs
+* uniq(gid)
 
 ### device
-uid name type token ctime
-* index(uid)
+type token ctime name
 * uniq(type, token)
 
 ## api
-* register: => user
-* bind: uid, name, type, token => ok/err
-* unbind: uid, type, token => ok/err
-* list: uid => devices
-* message: uid, content => ok/err
+* bind: gid, type, token, name => ok/err
+* unbind: gid, type, token => ok/err
+* list: gid => []devices{type, token, name}
+* message: gid, content => ok/err

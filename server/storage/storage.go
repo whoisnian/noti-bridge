@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	gUserMap   = newUserMap()
+	gGroupMap  = newGroupMap()
 	gDeviceMap = newDeviceMap()
 
 	dataDir string
@@ -24,7 +24,7 @@ func SetupDataDir(dir string) {
 		log.Fatalln(err)
 	}
 
-	if err = gUserMap.loadFrom(filepath.Join(dataDir, gUserMap.fName())); err != nil {
+	if err = gGroupMap.loadFrom(filepath.Join(dataDir, gGroupMap.fName())); err != nil {
 		log.Fatalln(err)
 	}
 	if err = gDeviceMap.loadFrom(filepath.Join(dataDir, gDeviceMap.fName())); err != nil {
@@ -33,7 +33,7 @@ func SetupDataDir(dir string) {
 }
 
 func Flush() error {
-	if err := gUserMap.saveAs(filepath.Join(dataDir, gUserMap.fName())); err != nil {
+	if err := gGroupMap.saveAs(filepath.Join(dataDir, gGroupMap.fName())); err != nil {
 		return err
 	}
 	return gDeviceMap.saveAs(filepath.Join(dataDir, gDeviceMap.fName()))
