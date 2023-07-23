@@ -40,7 +40,6 @@ func NotifyAndroid(tsk *task.Task, token string) error {
 		},
 	}
 
-	res, err := fcmClient.Send(context.Background(), msg)
-	log.Println(res)
+	_, err := fcmClient.Send(context.Background(), msg)
 	return err
 }
