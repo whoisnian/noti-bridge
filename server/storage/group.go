@@ -3,15 +3,14 @@ package storage
 import (
 	"encoding/json"
 	"os"
-	"time"
 
 	"github.com/whoisnian/glb/util/osutil"
 )
 
 type Group struct {
 	GID   string
-	CTime time.Time
-	ATime time.Time
+	CTime int64
+	ATime int64
 	Subs  []DeviceIndex
 }
 

@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"os"
-	"time"
 
 	"github.com/whoisnian/glb/util/osutil"
 )
@@ -15,7 +14,7 @@ const (
 type Device struct {
 	Type  int64
 	Token string
-	CTime time.Time
+	CTime int64
 	Name  string
 }
 
