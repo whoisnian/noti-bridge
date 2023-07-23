@@ -59,7 +59,7 @@ func (dm *DeviceMap) loadFrom(fPath string) error {
 }
 
 func (dm *DeviceMap) saveAs(fPath string) error {
-	fi, err := os.OpenFile(fPath, os.O_WRONLY|os.O_CREATE, osutil.DefaultFileMode)
+	fi, err := os.OpenFile(fPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, osutil.DefaultFileMode)
 	if err != nil {
 		return err
 	}
