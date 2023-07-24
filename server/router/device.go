@@ -33,7 +33,7 @@ func bindHandler(store *httpd.Store) {
 		return
 	}
 
-	store.RespondJson(nil)
+	store.RespondJson(msgOK)
 }
 
 func unbindHandler(store *httpd.Store) {
@@ -60,7 +60,7 @@ func unbindHandler(store *httpd.Store) {
 		return
 	}
 
-	store.RespondJson(nil)
+	store.RespondJson(msgOK)
 }
 
 func listHandler(store *httpd.Store) {

@@ -8,6 +8,10 @@ import (
 
 type jsonMap map[string]any
 
+var (
+	msgOK = jsonMap{"msg": "ok"}
+)
+
 func Setup() *httpd.Mux {
 	mux := httpd.NewMux()
 
