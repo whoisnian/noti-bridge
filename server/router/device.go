@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/whoisnian/glb/httpd"
-	"github.com/whoisnian/noti-bridge/storage"
+	"github.com/whoisnian/noti-bridge/server/storage"
 )
 
 func bindHandler(store *httpd.Store) {

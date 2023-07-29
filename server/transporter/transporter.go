@@ -3,8 +3,8 @@ package transporter
 import (
 	"errors"
 
-	"github.com/whoisnian/noti-bridge/storage"
-	"github.com/whoisnian/noti-bridge/task"
+	"github.com/whoisnian/noti-bridge/server/storage"
+	"github.com/whoisnian/noti-bridge/server/task"
 )
 
 func Notify(tsk *task.Task, dev *storage.Device) error {

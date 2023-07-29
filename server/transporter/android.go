@@ -7,7 +7,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
-	"github.com/whoisnian/noti-bridge/task"
+	"github.com/whoisnian/noti-bridge/server/task"
 	"google.golang.org/api/option"
 )
 

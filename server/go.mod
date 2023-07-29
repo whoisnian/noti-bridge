@@ -1,4 +1,4 @@
-module github.com/whoisnian/noti-bridge
+module github.com/whoisnian/noti-bridge/server
 
 go 1.20
 

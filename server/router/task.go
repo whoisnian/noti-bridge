@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/whoisnian/glb/httpd"
-	"github.com/whoisnian/noti-bridge/storage"
-	"github.com/whoisnian/noti-bridge/task"
-	"github.com/whoisnian/noti-bridge/transporter"
+	"github.com/whoisnian/noti-bridge/server/storage"
+	"github.com/whoisnian/noti-bridge/server/task"
+	"github.com/whoisnian/noti-bridge/server/transporter"
 )
 
 func messageHandler(store *httpd.Store) {

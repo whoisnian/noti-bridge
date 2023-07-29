@@ -9,10 +9,10 @@ import (
 	"github.com/whoisnian/glb/config"
 	"github.com/whoisnian/glb/logger"
 	"github.com/whoisnian/glb/util/osutil"
-	"github.com/whoisnian/noti-bridge/global"
-	"github.com/whoisnian/noti-bridge/router"
-	"github.com/whoisnian/noti-bridge/storage"
-	"github.com/whoisnian/noti-bridge/transporter"
+	"github.com/whoisnian/noti-bridge/server/global"
+	"github.com/whoisnian/noti-bridge/server/router"
+	"github.com/whoisnian/noti-bridge/server/storage"
+	"github.com/whoisnian/noti-bridge/server/transporter"
 )
 
 func main() {
