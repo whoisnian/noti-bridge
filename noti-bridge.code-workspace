@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "noti-bridge",
+			"path": "."
+		},
+		{
+			"name": "server",
+			"path": "server"
+		},
+		{
+			"name": "android",
+			"path": "android"
+		},
+		{
+			"name": "desktop",
+			"path": "desktop"
+		}
+	],
+	"settings": {}
+}
