@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">noti</string>
+    <string name="fcm_channel_id">messages</string>
+    <string name="fcm_channel_name">FCM messages</string>
 </resources>
