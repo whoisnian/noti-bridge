@@ -28,6 +28,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <receiver
+            android:name=".BackgroundReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.whoisnian.noti.COPY_TEXT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
