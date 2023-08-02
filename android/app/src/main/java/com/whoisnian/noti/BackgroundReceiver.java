@@ -20,7 +20,8 @@ public class BackgroundReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("com.whoisnian.noti.COPY_TEXT")) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             clipboard.setPrimaryClip(intent.getClipData());
-            NotificationManagerCompat.from(context).cancel(intent.getIntExtra("nid", 0));
+            int tid = Integer.parseInt(intent.getData().getQueryParameter("tid"));
+            NotificationManagerCompat.from(context).cancel(tid);
             Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
         }
     }
