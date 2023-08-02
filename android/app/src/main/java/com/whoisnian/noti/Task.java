@@ -23,7 +23,7 @@ public class Task {
 
     private final String type; // "ping" | "text" | "link"
     private final String title, text, link;
-    private final int uid;
+    private final int nid;
 
     public Task(Context ctx, Map<String, String> data) {
         this.mContext = ctx;
@@ -31,7 +31,7 @@ public class Task {
         this.title = data.getOrDefault("Title", "");
         this.text = data.getOrDefault("Text", "");
         this.link = data.getOrDefault("Link", "");
-        this.uid = (int) SystemClock.uptimeMillis();
+        this.nid = (int) SystemClock.uptimeMillis();
     }
 
     public void show() {
@@ -39,30 +39,33 @@ public class Task {
             Log.w(TAG, "Missing permission.POST_NOTIFICATIONS");
             return;
         }
-        NotificationManagerCompat.from(mContext).notify(this.uid, this.buildNotification());
+        NotificationManagerCompat.from(mContext).notify(this.nid, this.buildNotification());
     }
 
     private Notification buildNotification() {
         String ChannelID = mContext.getString(R.string.fcm_channel_id);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, ChannelID);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentIntent(openMainIntent());
         builder.setAutoCancel(true);
 
         switch (this.type) {
             case "ping":
                 builder.setContentTitle("Ping");
+                builder.setContentIntent(openMainIntent());
                 break;
             case "text":
                 if (!this.title.isEmpty()) builder.setContentTitle(this.title);
                 builder.setContentText(this.text);
-                builder.addAction(0, "copy text", copyTextIntent());
+                builder.setContentIntent(openMainIntent());
+                builder.addAction(0, "copy text", copyTextIntent(this.text));
                 break;
             case "link":
                 if (!this.title.isEmpty()) builder.setContentTitle(this.title);
-                builder.setContentText(this.text.isEmpty() ? this.link : this.text);
-                builder.addAction(0, "copy text", copyTextIntent());
-                builder.addAction(0, "open link", openLinkIntent());
+                String text = this.text.isEmpty() ? this.link : this.text;
+                builder.setContentText(text);
+                builder.setContentIntent(openLinkIntent(this.link));
+                builder.addAction(0, "copy text", copyTextIntent(text));
+                builder.addAction(0, "copy link", copyTextIntent(this.link));
                 break;
         }
         return builder.build();
@@ -74,15 +77,16 @@ public class Task {
         return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private PendingIntent copyTextIntent() {
-        Intent copy = new Intent(mContext, BackgroundReceiver.class);
-        copy.setAction("com.whoisnian.noti.COPY_TEXT");
-        copy.setClipData(ClipData.newPlainText("text", this.text.isEmpty() ? this.link : this.text));
-        return PendingIntent.getBroadcast(mContext, 0, copy, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+    private PendingIntent copyTextIntent(String text) {
+        Intent intent = new Intent(mContext, BackgroundReceiver.class);
+        intent.setAction("com.whoisnian.noti.COPY_TEXT");
+        intent.setClipData(ClipData.newPlainText("text", text));
+        intent.putExtra("nid", this.nid);
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
-    private PendingIntent openLinkIntent() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(this.link));
+    private PendingIntent openLinkIntent(String link) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
         return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 }
