@@ -2,7 +2,6 @@ package transporter
 
 import (
 	"context"
-	"log"
 	"time"
 
 	firebase "firebase.google.com/go/v4"
@@ -17,17 +16,15 @@ var (
 	zeroTTL = new(time.Duration)
 )
 
-func SetupAndroid(filename string) {
+func SetupAndroid(filename string) error {
 	opt := option.WithCredentialsFile(filename)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	fcmClient, err = app.Messaging(context.Background())
-	if err != nil {
-		log.Fatalln(err)
-	}
+	return err
 }
 
 func NotifyAndroid(tsk *task.Task, token string) error {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/whoisnian/glb/httpd"
+	"github.com/whoisnian/noti-bridge/server/global"
 )
 
 type jsonMap map[string]any
@@ -14,6 +15,7 @@ var (
 
 func Setup() *httpd.Mux {
 	mux := httpd.NewMux()
+	mux.HandleRelay(global.LOG.Relay)
 
 	mux.Handle("/api/device", http.MethodPut, bindHandler)
 	mux.Handle("/api/device", http.MethodDelete, unbindHandler)
