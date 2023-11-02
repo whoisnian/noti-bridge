@@ -28,7 +28,7 @@ func messageHandler(store *httpd.Store) {
 		if err := transporter.Notify(&params.Task, &devices[i]); err != nil {
 			results = append(results, err.Error())
 		} else {
-			results = append(results, "")
+			results = append(results, "ok")
 		}
 	}
 

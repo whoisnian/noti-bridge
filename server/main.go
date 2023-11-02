@@ -21,7 +21,7 @@ func main() {
 		return
 	}
 
-	if err := storage.SetupDataDir(global.CFG.DataPath); err != nil {
+	if err := storage.SetupDataDir(global.CFG.StoragePath); err != nil {
 		global.LOG.Fatal(err.Error())
 	}
 	transporter.SetupAndroid(global.CFG.CredentialPath)

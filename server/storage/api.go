@@ -15,8 +15,7 @@ func Bind(gid string, typ int64, token string, name string) error {
 	}
 
 	if g, ok := gGroupMap.m[gid]; !ok {
-		g = &Group{gid, now, now, []DeviceIndex{idx}}
-		gGroupMap.m[gid] = g
+		gGroupMap.m[gid] = &Group{gid, now, now, []DeviceIndex{idx}}
 	} else {
 		g.ATime = now
 		for _, sub := range g.Subs {
