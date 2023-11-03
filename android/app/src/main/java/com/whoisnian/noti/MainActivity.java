@@ -2,12 +2,13 @@ package com.whoisnian.noti;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -36,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                 return;
             }
-
             Log.d(TAG, "FCM registration Token: " + task.getResult());
-            Toast.makeText(MainActivity.this, task.getResult(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -46,10 +45,17 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        // reset permission for test:
+        // adb shell pm revoke com.whoisnian.noti android.permission.POST_NOTIFICATIONS
+        // adb shell pm clear-permission-flags com.whoisnian.noti android.permission.POST_NOTIFICATIONS user-set
+        // adb shell pm clear-permission-flags com.whoisnian.noti android.permission.POST_NOTIFICATIONS user-fixed
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Request permission success");
         } else {
             Log.w(TAG, "Request permission failed");
+            Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+            startActivity(intent);
         }
     }
 
