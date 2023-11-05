@@ -17,10 +17,10 @@ import androidx.core.app.NotificationManagerCompat;
 import java.util.Map;
 
 public class Task {
+    public static final String ACTION_COPY_TEXT = "com.whoisnian.noti.COPY_TEXT";
     private static final String TAG = "Task";
 
     private final Context mContext;
-
     private final String type; // "ping" | "text" | "link"
     private final String title, text, link;
     private final int tid;
@@ -34,9 +34,9 @@ public class Task {
         this.tid = (int) SystemClock.uptimeMillis();
     }
 
-    public void show() {
+    public void showNotification() {
         if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Missing permission.POST_NOTIFICATIONS");
+            Log.w(TAG, "Missing " + android.Manifest.permission.POST_NOTIFICATIONS);
             return;
         }
         NotificationManagerCompat.from(mContext).notify(this.tid, this.buildNotification());
@@ -90,7 +90,7 @@ public class Task {
 
     private PendingIntent copyTextIntent(String text, String typ) {
         Intent intent = new Intent(mContext, BackgroundReceiver.class);
-        intent.setAction("com.whoisnian.noti.COPY_TEXT");
+        intent.setAction(ACTION_COPY_TEXT);
         intent.setClipData(ClipData.newPlainText("text", text));
         intent.setData(buildUri(typ));
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);

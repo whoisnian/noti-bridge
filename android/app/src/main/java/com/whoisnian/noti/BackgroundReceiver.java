@@ -14,10 +14,10 @@ public class BackgroundReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "Received intent " + intent.toString());
+        Log.d(TAG, "Received intent " + intent);
         if (intent.getAction() == null) return;
 
-        if (intent.getAction().equals("com.whoisnian.noti.COPY_TEXT")) {
+        if (intent.getAction().equals(Task.ACTION_COPY_TEXT)) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             clipboard.setPrimaryClip(intent.getClipData());
             int tid = Integer.parseInt(intent.getData().getQueryParameter("tid"));
