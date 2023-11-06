@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">noti</string>
+    <string name="app_repo">https://github.com/whoisnian/noti-bridge</string>
+    <string name="app_registry">http://10.0.3.201:9000</string>
     <string name="fcm_channel_id">messages</string>
     <string name="fcm_channel_name">FCM messages</string>
 </resources>
