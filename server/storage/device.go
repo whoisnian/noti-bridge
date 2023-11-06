@@ -15,6 +15,7 @@ type Device struct {
 	Type  int64
 	Token string
 	CTime int64
+	ATime int64
 	Name  string
 }
 

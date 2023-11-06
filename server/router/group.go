@@ -8,8 +8,9 @@ import (
 	"github.com/whoisnian/noti-bridge/server/storage"
 )
 
-func updateDeviceHandler(store *httpd.Store) {
+func bindGroupsHandler(store *httpd.Store) {
 	params := struct {
+		GIDs  []string
 		Type  int64
 		Token string
 		Name  string
@@ -20,13 +21,13 @@ func updateDeviceHandler(store *httpd.Store) {
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
 	}
-	if params.Token == "" || params.Name == "" {
+	if len(params.GIDs) == 0 || params.Token == "" || params.Name == "" {
 		store.W.WriteHeader(http.StatusBadRequest)
-		store.RespondJson(jsonMap{"msg": "invalid params Token/Name"})
+		store.RespondJson(jsonMap{"msg": "invalid params GIDs/Token/Name"})
 		return
 	}
 
-	if err := storage.UpdateDevice(params.Type, params.Token, params.Name); err != nil {
+	if err := storage.Bind(params.GIDs, params.Type, params.Token, params.Name); err != nil {
 		store.W.WriteHeader(http.StatusUnprocessableEntity)
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
@@ -35,8 +36,9 @@ func updateDeviceHandler(store *httpd.Store) {
 	store.RespondJson(msgOK)
 }
 
-func deleteDeviceHandler(store *httpd.Store) {
+func unbindGroupsHandler(store *httpd.Store) {
 	params := struct {
+		GIDs  []string
 		Type  int64
 		Token string
 	}{}
@@ -46,13 +48,13 @@ func deleteDeviceHandler(store *httpd.Store) {
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
 	}
-	if params.Token == "" {
+	if len(params.GIDs) == 0 || params.Token == "" {
 		store.W.WriteHeader(http.StatusBadRequest)
-		store.RespondJson(jsonMap{"msg": "invalid params Token"})
+		store.RespondJson(jsonMap{"msg": "invalid params GIDs/Token"})
 		return
 	}
 
-	if err := storage.DeleteDevice(params.Type, params.Token); err != nil {
+	if err := storage.UnBind(params.GIDs, params.Type, params.Token); err != nil {
 		store.W.WriteHeader(http.StatusUnprocessableEntity)
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return

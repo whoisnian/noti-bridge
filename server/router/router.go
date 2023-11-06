@@ -17,10 +17,10 @@ func Setup() *httpd.Mux {
 	mux := httpd.NewMux()
 	mux.HandleRelay(global.LOG.Relay)
 
-	mux.Handle("/api/device", http.MethodPut, bindHandler)
-	mux.Handle("/api/device", http.MethodDelete, unbindHandler)
-	mux.Handle("/api/device", http.MethodGet, listHandler)
-
+	mux.Handle("/api/device", http.MethodPost, updateDeviceHandler)
+	mux.Handle("/api/device", http.MethodDelete, deleteDeviceHandler)
+	mux.Handle("/api/group", http.MethodPut, bindGroupsHandler)
+	mux.Handle("/api/group", http.MethodDelete, unbindGroupsHandler)
 	mux.Handle("/api/task", http.MethodPost, messageHandler)
 
 	mux.Handle("/status", http.MethodGet, statusHandler)
