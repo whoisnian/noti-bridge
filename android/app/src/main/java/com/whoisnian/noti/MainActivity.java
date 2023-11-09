@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -40,9 +42,15 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
         checkRequestPermission();
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (!task.isSuccessful())
+            if (!task.isSuccessful()) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-            else Log.d(TAG, "FCM registration Token: " + task.getResult());
+                Toast.makeText(this, "Fetching FCM registration token failed", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d(TAG, "FCM registration Token: " + task.getResult());
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                        .putString("fcm_token", task.getResult())
+                        .commit();
+            }
         });
     }
 
