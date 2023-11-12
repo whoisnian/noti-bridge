@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -43,6 +45,17 @@ public class PreferenceFragment extends PreferenceFragmentCompat implements Pref
     private Preference resetPreference;
     private Preference versionPreference;
     private Preference githubPreference;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

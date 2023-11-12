@@ -25,17 +25,17 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private ConstraintLayout layout_main;
-    private MenuItem options_clear;
-    private MenuItem options_settings;
+    private ConstraintLayout layoutMain;
+    private MenuItem optionsClear;
+    private MenuItem optionsSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        layout_main = new ConstraintLayout(this);
-        layout_main.setId(View.generateViewId());
-        setContentView(layout_main);
+        layoutMain = new ConstraintLayout(this);
+        layoutMain.setId(View.generateViewId());
+        setContentView(layoutMain);
         setActionBarBackStack();
         setCurrentFragment(new HistoryFragment(), false);
 
@@ -56,17 +56,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        options_clear = menu.add("clear");
-        options_settings = menu.add("settings");
+        optionsClear = menu.add("clear");
+        optionsSettings = menu.add("settings");
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
-        if (item.equals(options_clear)) {
+        if (item.equals(optionsClear)) {
             setCurrentFragment(new HistoryFragment(), true);
-        } else if (item.equals(options_settings)) {
+        } else if (item.equals(optionsSettings)) {
             setCurrentFragment(new PreferenceFragment(), true);
         } else if (item.getItemId() == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setCurrentFragment(Fragment fragment, boolean canBack) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(layout_main.getId(), fragment);
+        transaction.replace(layoutMain.getId(), fragment);
         if (canBack) transaction.addToBackStack(null);
         transaction.commit();
     }
