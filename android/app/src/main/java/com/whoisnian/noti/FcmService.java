@@ -7,13 +7,23 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Date;
+import java.util.Map;
+
 public class FcmService extends FirebaseMessagingService {
     private static final String TAG = "FcmService";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Task task = new Task(this, remoteMessage.getData());
-        task.showNotification();
+        Map<String, String> data = remoteMessage.getData();
+        new Task(this,
+                0,
+                data.getOrDefault("Type", "ping"),
+                data.getOrDefault("Title", ""),
+                data.getOrDefault("Text", ""),
+                data.getOrDefault("Link", ""),
+                new Date()
+        ).showNotification();
     }
 
     @Override

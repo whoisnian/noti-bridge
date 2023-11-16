@@ -6,40 +6,87 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class Task {
-    public static final String ACTION_COPY_TEXT = "com.whoisnian.noti.COPY_TEXT";
     private static final String TAG = "Task";
 
-    private final Context mContext;
-    private final String type; // "ping" | "text" | "link"
-    private final String title, text, link;
-    private final int tid;
+    public static final String ACTION_COPY_TEXT = "com.whoisnian.noti.COPY_TEXT";
+    public static final String SQL_CREATE_TABLE = "CREATE TABLE tasks("
+            + "tid INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + "type TEXT NOT NULL,"
+            + "title TEXT NOT NULL,"
+            + "text TEXT NOT NULL,"
+            + "link TEXT NOT NULL,"
+            + "ctime INTEGER NOT NULL)";
+    public static final String SQL_DELETE_TABLE = "DROP TABLE IF EXISTS tasks";
 
-    public Task(Context ctx, Map<String, String> data) {
+    public final Context mContext;
+    public final long tid;
+    public final String type, title, text, link;
+    public final Date ctime;
+
+    public Task(Context ctx, long tid, String type, String title, String text, String link, Date ctime) {
         this.mContext = ctx;
-        this.type = data.getOrDefault("Type", "ping");
-        this.title = data.getOrDefault("Title", "");
-        this.text = data.getOrDefault("Text", "");
-        this.link = data.getOrDefault("Link", "");
-        this.tid = (int) SystemClock.uptimeMillis();
+        this.tid = tid;
+        this.type = type;
+        this.title = title;
+        this.text = text;
+        this.link = link;
+        this.ctime = ctime;
+    }
+
+    public void insertToDB(SQLiteDatabase db) {
+
+    }
+
+    public void deleteFromDB(SQLiteDatabase db) {
+
+    }
+
+    public static List<Task> loadTasksFromDB(SQLiteDatabase db) {
+        Cursor cursor = db.query("tasks", null, null, null, null, null, null);
+        int idxTID = cursor.getColumnIndex("tid");
+        int idxType = cursor.getColumnIndex("type");
+        int idxTitle = cursor.getColumnIndex("title");
+        int idxText = cursor.getColumnIndex("text");
+        int idxLink = cursor.getColumnIndex("link");
+        int idxCtime = cursor.getColumnIndex("ctime");
+        List<Task> tasks = new ArrayList<Task>(cursor.getCount());
+        while (cursor.moveToNext()) {
+            tasks.add(new Task(
+                    null,
+                    cursor.getLong(idxTID),
+                    cursor.getString(idxType),
+                    cursor.getString(idxTitle),
+                    cursor.getString(idxText),
+                    cursor.getString(idxLink),
+                    new Date(cursor.getLong(idxCtime))
+            ));
+        }
+        cursor.close();
+        return tasks;
     }
 
     public void showNotification() {
+        if (mContext == null) return;
+
         if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Missing " + android.Manifest.permission.POST_NOTIFICATIONS);
             return;
         }
-        NotificationManagerCompat.from(mContext).notify(this.tid, this.buildNotification());
+        NotificationManagerCompat.from(mContext).notify((int) this.tid, this.buildNotification());
     }
 
     private Notification buildNotification() {
@@ -76,7 +123,7 @@ public class Task {
         builder.scheme("noti");
         builder.authority("whoisnian.com");
         builder.appendPath("intent");
-        builder.appendQueryParameter("tid", Integer.toString(this.tid));
+        builder.appendQueryParameter("tid", Long.toString(this.tid));
         builder.appendQueryParameter("typ", typ);
         return builder.build();
     }

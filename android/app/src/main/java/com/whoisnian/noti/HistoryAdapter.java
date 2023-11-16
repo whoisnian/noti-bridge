@@ -12,15 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
     private static final String TAG = "HistoryAdapter";
 
-    private final String[] localDataSet;
+    private final List<Task> tasks;
 
-    public HistoryAdapter(String[] dataSet) {
-        localDataSet = dataSet;
+    public HistoryAdapter(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
     @Override
@@ -86,18 +87,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        if (position % 5 == 0) {
-            viewHolder.setContent("ping", "title", localDataSet[position], "link");
-        } else if (position / 10 == 2) {
-            viewHolder.setContent("link", "title", localDataSet[position], "link");
-        } else {
-            viewHolder.setContent("text", "title", localDataSet[position], "link");
-        }
+        viewHolder.setTask(tasks.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return localDataSet.length;
+        return tasks.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -115,23 +110,23 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             this.openLink = openLink;
         }
 
-        public void setContent(String type, String title, String text, String link) {
-            typeView.setText(type.toUpperCase());
-            timeView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).format(new Date()));
-            switch (type) {
+        public void setTask(Task task) {
+            typeView.setText(task.type.toUpperCase());
+            timeView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).format(task.ctime));
+            switch (task.type) {
                 case "ping":
                     hideView(textView);
                     hideView(copyText);
                     hideView(openLink);
                     break;
                 case "text":
-                    textView.setText(title + "\n" + text + "\n" + link);
+                    textView.setText(task.title + "\n" + task.text);
                     showView(textView);
                     showView(copyText);
                     hideView(openLink);
                     break;
                 case "link":
-                    textView.setText(title + "\n" + text + "\n" + link);
+                    textView.setText(task.title + "\n" + task.link);
                     showView(textView);
                     showView(copyText);
                     showView(openLink);
