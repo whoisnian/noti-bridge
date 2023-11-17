@@ -104,48 +104,36 @@ public class Task {
                 if (!this.title.isEmpty()) builder.setContentTitle(this.title);
                 builder.setContentText(this.text);
                 builder.setContentIntent(openMainIntent());
-                builder.addAction(0, "copy text", copyTextIntent(this.text, "copy_text"));
+                builder.addAction(0, "copy text", copyTextIntent(this.text));
                 break;
             case "link":
                 if (!this.title.isEmpty()) builder.setContentTitle(this.title);
                 String text = this.text.isEmpty() ? this.link : this.text;
                 builder.setContentText(text);
                 builder.setContentIntent(openLinkIntent(this.link));
-                builder.addAction(0, "copy text", copyTextIntent(text, "copy_text"));
-                builder.addAction(0, "copy link", copyTextIntent(this.link, "copy_link"));
+                builder.addAction(0, "copy text", copyTextIntent(text));
+                builder.addAction(0, "copy link", copyTextIntent(this.link));
                 break;
         }
-        return builder.build();
-    }
-
-    private Uri buildUri(String typ) {
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("noti");
-        builder.authority("whoisnian.com");
-        builder.appendPath("intent");
-        builder.appendQueryParameter("tid", Long.toString(this.tid));
-        builder.appendQueryParameter("typ", typ);
         return builder.build();
     }
 
     private PendingIntent openMainIntent() {
         Intent intent = new Intent(mContext, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setData(buildUri("open_main"));
         return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private PendingIntent copyTextIntent(String text, String typ) {
+    private PendingIntent copyTextIntent(String text) {
         Intent intent = new Intent(mContext, BackgroundReceiver.class);
         intent.setAction(ACTION_COPY_TEXT);
         intent.setClipData(ClipData.newPlainText("text", text));
-        intent.setData(buildUri(typ));
+        intent.setData(Uri.parse("noti://whoisnian.com/intent?tid=" + this.tid));
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private PendingIntent openLinkIntent(String link) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-        intent.setData(buildUri("open_link"));
         return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 }
