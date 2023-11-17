@@ -86,6 +86,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         return tasks.size();
     }
 
+    public void clear() {
+        tasks.clear();
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final ConstraintLayout base;
         private final TextView typeView, timeView, contentView;

@@ -1,5 +1,6 @@
 package com.whoisnian.noti;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SQLiteDatabase DB;
     private ConstraintLayout layoutMain;
+    private HistoryFragment historyFrag;
     private MenuItem optionsClear;
     private MenuItem optionsSettings;
 
@@ -39,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         layoutMain.setId(View.generateViewId());
         setContentView(layoutMain);
         setActionBarBackStack();
-        setCurrentFragment(new HistoryFragment(), false);
+        historyFrag = new HistoryFragment();
+        setCurrentFragment(historyFrag, false);
 
         createNotificationChannel();
         checkRequestPermission();
@@ -57,10 +61,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        optionsClear = menu.add("clear");
-        optionsSettings = menu.add("settings");
+        if (menu instanceof MenuBuilder) {
+            ((MenuBuilder) menu).setOptionalIconsVisible(true);
+        }
+        optionsClear = menu.add("Clear");
+        optionsClear.setIcon(R.drawable.outline_delete_sweep_24);
+        optionsSettings = menu.add("Settings");
+        optionsSettings.setIcon(R.drawable.outline_settings_24);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -69,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onOptionsItemSelected: " + item);
         if (item.equals(optionsClear)) {
             Task.deleteAllFromDB(DB);
+            historyFrag.clear();
         } else if (item.equals(optionsSettings)) {
             setCurrentFragment(new PreferenceFragment(), true);
         } else if (item.getItemId() == android.R.id.home) {

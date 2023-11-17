@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class HistoryFragment extends Fragment {
     private SQLiteDatabase DB;
+    private HistoryAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,8 +29,13 @@ public class HistoryFragment extends Fragment {
         RecyclerView root = new RecyclerView(context);
         root.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         root.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-        root.setAdapter(new HistoryAdapter(Task.loadAllFromDB(this.DB)));
+        adapter = new HistoryAdapter(Task.loadAllFromDB(this.DB));
+        root.setAdapter(adapter);
         return root;
+    }
+
+    public void clear() {
+        adapter.clear();
     }
 
     @Override
