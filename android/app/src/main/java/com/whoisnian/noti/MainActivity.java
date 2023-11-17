@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
+    private SQLiteDatabase DB;
     private ConstraintLayout layoutMain;
     private MenuItem optionsClear;
     private MenuItem optionsSettings;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
         checkRequestPermission();
+        DB = new DatabaseHelper(this).getWritableDatabase();
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
         if (item.equals(optionsClear)) {
-            setCurrentFragment(new HistoryFragment(), true);
+            Task.deleteAllFromDB(DB);
         } else if (item.equals(optionsSettings)) {
             setCurrentFragment(new PreferenceFragment(), true);
         } else if (item.getItemId() == android.R.id.home) {
@@ -92,6 +95,12 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        DB.close();
+        super.onDestroy();
     }
 
     private void createNotificationChannel() {
