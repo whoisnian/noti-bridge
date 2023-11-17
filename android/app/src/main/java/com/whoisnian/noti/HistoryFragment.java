@@ -12,15 +12,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
 public class HistoryFragment extends Fragment {
-    private static final String TAG = "HistoryFragment";
+    private SQLiteDatabase DB;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        this.DB = new DatabaseHelper(this.getContext()).getReadableDatabase();
     }
 
     @Override
@@ -29,9 +28,13 @@ public class HistoryFragment extends Fragment {
         RecyclerView root = new RecyclerView(context);
         root.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         root.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-
-        SQLiteDatabase db = new DatabaseHelper(container.getContext()).getReadableDatabase();
-        root.setAdapter(new HistoryAdapter(Task.loadTasksFromDB(db)));
+        root.setAdapter(new HistoryAdapter(Task.loadAllFromDB(this.DB)));
         return root;
+    }
+
+    @Override
+    public void onDestroy() {
+        this.DB.close();
+        super.onDestroy();
     }
 }

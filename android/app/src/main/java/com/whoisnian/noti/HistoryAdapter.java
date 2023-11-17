@@ -55,13 +55,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         baseSet.connect(timeView.getId(), ConstraintSet.TOP, base.getId(), ConstraintSet.TOP);
         baseSet.connect(timeView.getId(), ConstraintSet.RIGHT, base.getId(), ConstraintSet.RIGHT);
 
-        TextView textView = new TextView(viewGroup.getContext());
-        textView.setId(View.generateViewId());
-        base.addView(textView);
-        baseSet.constrainHeight(textView.getId(), ConstraintSet.WRAP_CONTENT);
-        baseSet.constrainWidth(textView.getId(), ConstraintSet.WRAP_CONTENT);
-        baseSet.connect(textView.getId(), ConstraintSet.TOP, typeView.getId(), ConstraintSet.BOTTOM, 25);
-        baseSet.connect(textView.getId(), ConstraintSet.LEFT, base.getId(), ConstraintSet.LEFT);
+        TextView contentView = new TextView(viewGroup.getContext());
+        contentView.setId(View.generateViewId());
+        base.addView(contentView);
+        baseSet.constrainHeight(contentView.getId(), ConstraintSet.WRAP_CONTENT);
+        baseSet.constrainWidth(contentView.getId(), ConstraintSet.WRAP_CONTENT);
+        baseSet.connect(contentView.getId(), ConstraintSet.TOP, typeView.getId(), ConstraintSet.BOTTOM, 25);
+        baseSet.connect(contentView.getId(), ConstraintSet.LEFT, base.getId(), ConstraintSet.LEFT);
 
         Button copyText = new Button(viewGroup.getContext());
         copyText.setId(View.generateViewId());
@@ -69,20 +69,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         base.addView(copyText);
         baseSet.constrainHeight(copyText.getId(), ConstraintSet.WRAP_CONTENT);
         baseSet.constrainWidth(copyText.getId(), ConstraintSet.WRAP_CONTENT);
-        baseSet.connect(copyText.getId(), ConstraintSet.TOP, textView.getId(), ConstraintSet.BOTTOM, 25);
+        baseSet.connect(copyText.getId(), ConstraintSet.TOP, contentView.getId(), ConstraintSet.BOTTOM, 25);
         baseSet.connect(copyText.getId(), ConstraintSet.RIGHT, base.getId(), ConstraintSet.RIGHT);
 
-        Button openLink = new Button(viewGroup.getContext());
-        openLink.setId(View.generateViewId());
-        openLink.setText("OPEN");
-        base.addView(openLink);
-        baseSet.constrainHeight(openLink.getId(), ConstraintSet.WRAP_CONTENT);
-        baseSet.constrainWidth(openLink.getId(), ConstraintSet.WRAP_CONTENT);
-        baseSet.connect(openLink.getId(), ConstraintSet.TOP, textView.getId(), ConstraintSet.BOTTOM, 25);
-        baseSet.connect(openLink.getId(), ConstraintSet.RIGHT, copyText.getId(), ConstraintSet.LEFT);
-
         baseSet.applyTo(base);
-        return new ViewHolder(base, typeView, timeView, textView, copyText, openLink);
+        return new ViewHolder(base, typeView, timeView, contentView, copyText);
     }
 
     @Override
@@ -97,17 +88,16 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final ConstraintLayout base;
-        private final TextView typeView, timeView, textView;
-        private final Button copyText, openLink;
+        private final TextView typeView, timeView, contentView;
+        private final Button copyText;
 
-        public ViewHolder(ConstraintLayout base, TextView typeView, TextView timeView, TextView textView, Button copyText, Button openLink) {
+        public ViewHolder(ConstraintLayout base, TextView typeView, TextView timeView, TextView contentView, Button copyText) {
             super(base);
             this.base = base;
             this.typeView = typeView;
             this.timeView = timeView;
-            this.textView = textView;
+            this.contentView = contentView;
             this.copyText = copyText;
-            this.openLink = openLink;
         }
 
         public void setTask(Task task) {
@@ -115,21 +105,18 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             timeView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).format(task.ctime));
             switch (task.type) {
                 case "ping":
-                    hideView(textView);
+                    hideView(contentView);
                     hideView(copyText);
-                    hideView(openLink);
                     break;
                 case "text":
-                    textView.setText(task.title + "\n" + task.text);
-                    showView(textView);
+                    contentView.setText(task.title + "\n" + task.text);
+                    showView(contentView);
                     showView(copyText);
-                    hideView(openLink);
                     break;
                 case "link":
-                    textView.setText(task.title + "\n" + task.link);
-                    showView(textView);
+                    contentView.setText(task.title + "\n" + task.link);
+                    showView(contentView);
                     showView(copyText);
-                    showView(openLink);
                     break;
             }
         }

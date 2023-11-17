@@ -3,7 +3,7 @@ package task
 const (
 	TypePing = "ping" // no content or title
 	TypeText = "text" // text as content, optional title
-	TypeLink = "link" // text or link as content, optional title
+	TypeLink = "link" // link as content, optional title
 )
 
 type Task struct {
