@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
         if (item.equals(optionsClear)) {
-            Task.deleteAllFromDB(DB);
             historyFrag.clear();
         } else if (item.equals(optionsSettings)) {
             setCurrentFragment(new PreferenceFragment(), true);

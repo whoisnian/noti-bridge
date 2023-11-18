@@ -20,7 +20,7 @@ public class HistoryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        this.DB = new DatabaseHelper(this.getContext()).getReadableDatabase();
+        this.DB = new DatabaseHelper(this.getContext()).getWritableDatabase();
     }
 
     @Override
@@ -29,10 +29,12 @@ public class HistoryFragment extends Fragment {
         RecyclerView root = new RecyclerView(context);
         root.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         root.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-        adapter = new HistoryAdapter(Task.loadAllFromDB(this.DB));
-        root.setAdapter(adapter);
         root.setPadding(0, 0, 0, 100);
         root.setClipToPadding(false);
+
+        adapter = new HistoryAdapter(this.DB);
+        adapter.setHasStableIds(true);
+        root.setAdapter(adapter);
         return root;
     }
 

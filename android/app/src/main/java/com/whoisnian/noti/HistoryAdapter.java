@@ -1,10 +1,11 @@
 package com.whoisnian.noti;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,10 +23,12 @@ import java.util.Locale;
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
     private static final String TAG = "HistoryAdapter";
 
+    private final SQLiteDatabase DB;
     private final List<Task> tasks;
 
-    public HistoryAdapter(List<Task> tasks) {
-        this.tasks = tasks;
+    public HistoryAdapter(SQLiteDatabase DB) {
+        this.DB = DB;
+        this.tasks = Task.loadAllFromDB(DB);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         baseSet.connect(copyText.getId(), ConstraintSet.RIGHT, base.getId(), ConstraintSet.RIGHT);
 
         baseSet.applyTo(base);
-        return new ViewHolder(base, typeView, timeView, contentView, copyText);
+        return new ViewHolder(this, base, typeView, timeView, contentView, copyText);
     }
 
     @Override
@@ -99,60 +102,97 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         return tasks.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return tasks.get(position).tid;
+    }
+
     public void clear() {
+        Task.deleteAllFromDB(DB);
         tasks.clear();
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public void delete(int position) {
+        tasks.get(position).deleteFromDB(DB);
+        tasks.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private final HistoryAdapter adapter;
         private final ConstraintLayout base;
         private final ImageView typeView;
         private final TextView timeView, contentView;
         private final Button copyText;
+        private Task task;
 
-        public ViewHolder(ConstraintLayout base, ImageView typeView, TextView timeView, TextView contentView, Button copyText) {
+        public ViewHolder(HistoryAdapter adapter, ConstraintLayout base, ImageView typeView, TextView timeView, TextView contentView, Button copyText) {
             super(base);
+            this.adapter = adapter;
             this.base = base;
+            base.setOnClickListener(this);
+            base.setOnLongClickListener(this);
             this.typeView = typeView;
             this.timeView = timeView;
             this.contentView = contentView;
             this.copyText = copyText;
+            copyText.setOnClickListener(this);
         }
 
         public void setTask(Task task) {
-            timeView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).format(task.ctime));
+            this.task = task;
             switch (task.type) {
                 case "ping":
                     typeView.setImageResource(R.drawable.outline_notifications_24);
-                    hideView(contentView);
-                    hideView(copyText);
                     break;
                 case "text":
                     typeView.setImageResource(R.drawable.outline_message_24);
-                    contentView.setText(task.title + "\n" + task.text);
-                    showView(contentView);
-                    showView(copyText);
+                    contentView.setText(task.title.isEmpty() ? task.text : task.title + "\n" + task.text);
                     break;
                 case "link":
                     typeView.setImageResource(R.drawable.outline_link_24);
-                    contentView.setText(task.title + "\n" + task.link);
-                    showView(contentView);
-                    showView(copyText);
+                    contentView.setText(task.title.isEmpty() ? task.link : task.title + "\n" + task.link);
                     break;
             }
+            timeView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).format(task.ctime));
+            setVisibility(contentView, !task.type.equals("ping"));
+            setVisibility(copyText, !task.type.equals("ping"));
         }
 
-        private void hideView(View view) {
-            if (view.getVisibility() == View.VISIBLE) {
-                base.removeView(view);
-                view.setVisibility(View.INVISIBLE);
+        @Override
+        public void onClick(View view) {
+            if (view.equals(base)) {
+                if (task.type.equals("link"))
+                    base.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(task.link)));
+            } else if (view.equals(copyText)) {
+                Intent intent = new Intent(base.getContext(), BackgroundReceiver.class);
+                intent.setAction(Task.ACTION_COPY_TEXT);
+                intent.setClipData(ClipData.newPlainText("text", task.type.equals("link") ? task.link : task.text));
+                intent.setData(Uri.parse("noti://whoisnian.com/intent?tid=" + task.tid));
+                base.getContext().sendBroadcast(intent);
             }
         }
 
-        private void showView(View view) {
-            if (view.getVisibility() == View.INVISIBLE) {
+        @Override
+        public boolean onLongClick(View view) {
+            if (view.equals(base)) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(base.getContext());
+                dialogBuilder.setMessage("Delete this history?");
+                dialogBuilder.setPositiveButton("delete", (dialog, id) -> adapter.delete(getAdapterPosition()));
+                dialogBuilder.setNegativeButton("cancel", null);
+                dialogBuilder.show();
+            }
+            return true;
+        }
+
+        private void setVisibility(View view, boolean value) {
+            if (value && view.getVisibility() == View.INVISIBLE) {
                 view.setVisibility(View.VISIBLE);
                 base.addView(view);
+            } else if (!value && view.getVisibility() == View.VISIBLE) {
+                base.removeView(view);
+                view.setVisibility(View.INVISIBLE);
             }
         }
     }
