@@ -31,6 +31,8 @@ public class HistoryFragment extends Fragment {
         root.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         adapter = new HistoryAdapter(Task.loadAllFromDB(this.DB));
         root.setAdapter(adapter);
+        root.setPadding(0, 0, 0, 100);
+        root.setClipToPadding(false);
         return root;
     }
 

@@ -1,6 +1,10 @@
 package com.whoisnian.noti;
 
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -29,10 +33,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         ConstraintLayout base = new ConstraintLayout(viewGroup.getContext());
         base.setId(View.generateViewId());
         base.setBackgroundColor(Color.rgb(27, 30, 32));
-        base.setPadding(50, 50, 50, 50);
+        base.setPadding(50, 25, 50, 25);
 
         ConstraintLayout.LayoutParams baseLayout = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        baseLayout.setMargins(50, 50, 50, 50);
+        baseLayout.setMargins(100, 50, 100, 0);
         base.setLayoutParams(baseLayout);
 
         ConstraintSet baseSet = new ConstraintSet();
@@ -50,6 +54,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         TextView timeView = new TextView(viewGroup.getContext());
         timeView.setId(View.generateViewId());
         timeView.setLines(1);
+        timeView.setTextSize(12);
         base.addView(timeView);
         baseSet.constrainHeight(timeView.getId(), ConstraintSet.WRAP_CONTENT);
         baseSet.constrainWidth(timeView.getId(), ConstraintSet.WRAP_CONTENT);
@@ -68,6 +73,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         Button copyText = new Button(viewGroup.getContext());
         copyText.setId(View.generateViewId());
         copyText.setText("COPY");
+        copyText.setMinimumHeight(0);
+        copyText.setMinimumWidth(0);
+        copyText.setMinHeight(0);
+        copyText.setMinWidth(0);
+        copyText.setPadding(50, 20, 50, 20);
+        copyText.setBackgroundColor(Color.rgb(49, 54, 59));
         base.addView(copyText);
         baseSet.constrainHeight(copyText.getId(), ConstraintSet.WRAP_CONTENT);
         baseSet.constrainWidth(copyText.getId(), ConstraintSet.WRAP_CONTENT);
