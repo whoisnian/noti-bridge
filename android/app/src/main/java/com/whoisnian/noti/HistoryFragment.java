@@ -13,14 +13,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class HistoryFragment extends Fragment {
-    private SQLiteDatabase DB;
-    private HistoryAdapter adapter;
+    private final SQLiteDatabase DB;
+    public HistoryAdapter adapter;
+
+    public HistoryFragment(SQLiteDatabase DB) {
+        this.DB = DB;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        this.DB = new DatabaseHelper(this.getContext()).getWritableDatabase();
     }
 
     @Override
@@ -31,20 +34,8 @@ public class HistoryFragment extends Fragment {
         root.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         root.setPadding(0, 0, 0, 100);
         root.setClipToPadding(false);
-
-        adapter = new HistoryAdapter(this.DB);
-        adapter.setHasStableIds(true);
+        adapter = new HistoryAdapter(DB);
         root.setAdapter(adapter);
         return root;
-    }
-
-    public void clear() {
-        adapter.clear();
-    }
-
-    @Override
-    public void onDestroy() {
-        this.DB.close();
-        super.onDestroy();
     }
 }

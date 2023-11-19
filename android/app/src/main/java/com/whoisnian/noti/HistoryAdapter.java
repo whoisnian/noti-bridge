@@ -21,14 +21,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
-    private static final String TAG = "HistoryAdapter";
-
     private final SQLiteDatabase DB;
     private final List<Task> tasks;
 
     public HistoryAdapter(SQLiteDatabase DB) {
         this.DB = DB;
         this.tasks = Task.loadAllFromDB(DB);
+        this.setHasStableIds(true);
     }
 
     @Override

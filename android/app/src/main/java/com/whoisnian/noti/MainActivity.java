@@ -10,16 +10,12 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
@@ -29,24 +25,19 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private SQLiteDatabase DB;
-    private ConstraintLayout layoutMain;
     private HistoryFragment historyFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        layoutMain = new ConstraintLayout(this);
-        layoutMain.setId(View.generateViewId());
-        setContentView(layoutMain);
+        setContentView(R.layout.main_activity);
         setActionBarBackStack();
-        historyFrag = new HistoryFragment();
+        historyFrag = new HistoryFragment(new DatabaseHelper(this).getWritableDatabase());
         setCurrentFragment(historyFrag, false);
 
         createNotificationChannel();
         checkRequestPermission();
-        DB = new DatabaseHelper(this).getWritableDatabase();
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
@@ -74,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
         if (item.getItemId() == R.id.clear) {
-            historyFrag.clear();
+            historyFrag.adapter.clear();
         } else if (item.getItemId() == R.id.settings) {
             setCurrentFragment(new PreferenceFragment(), true);
         } else if (item.getItemId() == android.R.id.home) {
@@ -103,12 +94,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        DB.close();
-        super.onDestroy();
-    }
-
     private void createNotificationChannel() {
         String ChannelID = getString(R.string.fcm_channel_id);
         CharSequence ChannelName = getString(R.string.fcm_channel_name);
@@ -119,9 +104,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkRequestPermission() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Missing " + android.Manifest.permission.POST_NOTIFICATIONS);
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 0);
+            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 0);
         }
     }
 
@@ -136,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setCurrentFragment(Fragment fragment, boolean canBack) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(layoutMain.getId(), fragment);
+        transaction.replace(R.id.main, fragment);
         if (canBack) transaction.addToBackStack(null);
         transaction.commit();
     }
