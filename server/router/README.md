@@ -1,34 +1,46 @@
 # api
 
-## bind
-params: gid, type, token, name
+## updateDevice
+params: type, token, name
 ```sh
-curl -X PUT \
+curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"GID":"f50241fcc0f506b6bed770c72bd01ebb","Type":0,"Token":"e9KDLKiLTKiRAm1EAj4J_H:APA91bEwwCcUtPxeLu_Dck1FnmvaOyrNxnwEInDOuU1HWQQbVCHFvnhi_hcJrhe5h8IuFAQrbtKuM04ZBLM9dY-n6P1U7rttGs9wweXuerL2ZBoqx969NPqK6LTX-F-UZIr9DT4tpret","Name":"test"}' \
+  -d '{"Type":0,"Token":"ewSNx5l5TJOBLhE5cK9r1w:APA91bHxovPcitHn-8Qap6O6hv1jSYA_ZHdwV7t_TGm3Xomb1xHB6Z5zckNSKl87dpqAw0p0xEcucClEuEzUiPwZUHwLZSVX97fZ2owPGCK4e_BFgnO8wszFXJIJ3daYQxOj3_kFjCSf","Name":"test"}' \
   '127.0.0.1:9000/api/device'
 ```
 
-## unbind
-params: gid, type, token
+## deleteDevice
+params: type, token
 ```sh
 curl -X DELETE \
   -H 'Content-Type: application/json' \
-  -d '{"GID":"f50241fcc0f506b6bed770c72bd01ebb","Type":0,"Token":"e9KDLKiLTKiRAm1EAj4J_H:APA91bEwwCcUtPxeLu_Dck1FnmvaOyrNxnwEInDOuU1HWQQbVCHFvnhi_hcJrhe5h8IuFAQrbtKuM04ZBLM9dY-n6P1U7rttGs9wweXuerL2ZBoqx969NPqK6LTX-F-UZIr9DT4tpret"}' \
+  -d '{"Type":0,"Token":"ewSNx5l5TJOBLhE5cK9r1w:APA91bHxovPcitHn-8Qap6O6hv1jSYA_ZHdwV7t_TGm3Xomb1xHB6Z5zckNSKl87dpqAw0p0xEcucClEuEzUiPwZUHwLZSVX97fZ2owPGCK4e_BFgnO8wszFXJIJ3daYQxOj3_kFjCSf"}' \
   '127.0.0.1:9000/api/device'
 ```
 
-## list
-params: gid
+## bindGroups
+params: gids, type, token, name
 ```sh
-curl '127.0.0.1:9000/api/device?GID=f50241fcc0f506b6bed770c72bd01ebb'
+curl -X PUT \
+  -H 'Content-Type: application/json' \
+  -d '{"GIDs":["f50241fcc0f506b6bed770c72bd01ebb"],"Type":0,"Token":"ewSNx5l5TJOBLhE5cK9r1w:APA91bHxovPcitHn-8Qap6O6hv1jSYA_ZHdwV7t_TGm3Xomb1xHB6Z5zckNSKl87dpqAw0p0xEcucClEuEzUiPwZUHwLZSVX97fZ2owPGCK4e_BFgnO8wszFXJIJ3daYQxOj3_kFjCSf","Name":"test"}' \
+  '127.0.0.1:9000/api/device'
 ```
 
-## message
+## unbindGroups
+params: gids, type, token
+```sh
+curl -X DELETE \
+  -H 'Content-Type: application/json' \
+  -d '{"GIDs":"f50241fcc0f506b6bed770c72bd01ebb","Type":0,"Token":"ewSNx5l5TJOBLhE5cK9r1w:APA91bHxovPcitHn-8Qap6O6hv1jSYA_ZHdwV7t_TGm3Xomb1xHB6Z5zckNSKl87dpqAw0p0xEcucClEuEzUiPwZUHwLZSVX97fZ2owPGCK4e_BFgnO8wszFXJIJ3daYQxOj3_kFjCSf"}' \
+  '127.0.0.1:9000/api/device'
+```
+
+## task
 params: gid, task
 ```sh
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"GID":"f50241fcc0f506b6bed770c72bd01ebb","Task":{"Type":"TypePing"}}' \
+  -d '{"GID":"f50241fcc0f506b6bed770c72bd01ebb","Task":{"Type":"ping"}}' \
   '127.0.0.1:9000/api/task'
 ```

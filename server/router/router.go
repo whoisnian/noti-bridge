@@ -21,7 +21,7 @@ func Setup() *httpd.Mux {
 	mux.Handle("/api/device", http.MethodDelete, deleteDeviceHandler)
 	mux.Handle("/api/group", http.MethodPut, bindGroupsHandler)
 	mux.Handle("/api/group", http.MethodDelete, unbindGroupsHandler)
-	mux.Handle("/api/task", http.MethodPost, messageHandler)
+	mux.Handle("/api/task", http.MethodPost, taskHandler)
 
 	mux.Handle("/status", http.MethodGet, statusHandler)
 	return mux

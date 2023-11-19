@@ -2,9 +2,11 @@ package router
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/whoisnian/glb/httpd"
+	"github.com/whoisnian/noti-bridge/server/global"
 	"github.com/whoisnian/noti-bridge/server/storage"
 )
 
@@ -20,6 +22,13 @@ func updateDeviceHandler(store *httpd.Store) {
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
 	}
+	global.LOG.Info("update device",
+		slog.Int64("type", params.Type),
+		slog.String("name", params.Name),
+		slog.String("token", params.Token),
+		slog.String("tid", store.GetID()),
+	)
+
 	if params.Token == "" || params.Name == "" {
 		store.W.WriteHeader(http.StatusBadRequest)
 		store.RespondJson(jsonMap{"msg": "invalid params Token/Name"})
@@ -46,6 +55,12 @@ func deleteDeviceHandler(store *httpd.Store) {
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
 	}
+	global.LOG.Info("delete device",
+		slog.Int64("type", params.Type),
+		slog.String("token", params.Token),
+		slog.String("tid", store.GetID()),
+	)
+
 	if params.Token == "" {
 		store.W.WriteHeader(http.StatusBadRequest)
 		store.RespondJson(jsonMap{"msg": "invalid params Token"})
