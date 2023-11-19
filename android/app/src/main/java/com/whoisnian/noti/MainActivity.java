@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -31,8 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase DB;
     private ConstraintLayout layoutMain;
     private HistoryFragment historyFrag;
-    private MenuItem optionsClear;
-    private MenuItem optionsSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,19 +66,16 @@ public class MainActivity extends AppCompatActivity {
         if (menu instanceof MenuBuilder) {
             ((MenuBuilder) menu).setOptionalIconsVisible(true);
         }
-        optionsClear = menu.add("Clear");
-        optionsClear.setIcon(R.drawable.outline_delete_sweep_24);
-        optionsSettings = menu.add("Settings");
-        optionsSettings.setIcon(R.drawable.outline_settings_24);
+        getMenuInflater().inflate(R.menu.main_options_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
-        if (item.equals(optionsClear)) {
+        if (item.getItemId() == R.id.clear) {
             historyFrag.clear();
-        } else if (item.equals(optionsSettings)) {
+        } else if (item.getItemId() == R.id.settings) {
             setCurrentFragment(new PreferenceFragment(), true);
         } else if (item.getItemId() == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
