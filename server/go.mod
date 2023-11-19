@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	firebase.google.com/go/v4 v4.12.1
-	github.com/whoisnian/glb v1.3.2
+	github.com/whoisnian/glb v1.3.3
 	google.golang.org/api v0.151.0
 )
 

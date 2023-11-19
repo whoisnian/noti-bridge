@@ -28,7 +28,7 @@ func main() {
 
 	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: router.Setup()}
 	go func() {
-		global.LOG.Info("Service started: <http://" + global.CFG.ListenAddr + ">")
+		global.LOG.Infof("Service started: <http://%s>", global.CFG.ListenAddr)
 		if err := server.ListenAndServe(); errors.Is(err, http.ErrServerClosed) {
 			global.LOG.Warn("Service shutting down")
 		} else if err != nil {
