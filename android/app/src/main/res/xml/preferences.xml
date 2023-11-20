@@ -1,0 +1,57 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="device_management"
+        app:title="Device Management">
+        <EditTextPreference
+            app:dialogTitle="Rename"
+            app:iconSpaceReserved="false"
+            app:key="device_name"
+            app:title="Name"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="@string/app_registry"
+            app:dialogTitle="Address"
+            app:iconSpaceReserved="false"
+            app:key="device_registry"
+            app:title="Registry"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="group_binding"
+        app:title="Group Binding">
+        <ListPreference
+            app:dialogTitle="Select to quit"
+            app:iconSpaceReserved="false"
+            app:key="group_list"
+            app:summary="Current 0 groups"
+            app:title="List" />
+        <EditTextPreference
+            app:dialogTitle="Group ID"
+            app:iconSpaceReserved="false"
+            app:key="group_join"
+            app:summary="Create group if not exist"
+            app:title="Join" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="group_reset"
+            app:summary="Quit from all groups"
+            app:title="Reset" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="about"
+        app:title="About">
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="about_version"
+            app:summary="1.0"
+            app:title="Version" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="about_github"
+            app:summary="@string/app_repo"
+            app:title="GitHub" />
+    </PreferenceCategory>
+</PreferenceScreen>

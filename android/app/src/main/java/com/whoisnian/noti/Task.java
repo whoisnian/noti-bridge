@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -91,7 +90,7 @@ public class Task {
     public void showNotification(Context ctx) {
         if (ctx == null) return;
 
-        if (ActivityCompat.checkSelfPermission(ctx, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (ctx.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Missing " + android.Manifest.permission.POST_NOTIFICATIONS);
             return;
         }

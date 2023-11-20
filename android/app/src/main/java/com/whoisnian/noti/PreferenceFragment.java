@@ -1,21 +1,17 @@
 package com.whoisnian.noti;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,13 +34,9 @@ public class PreferenceFragment extends PreferenceFragmentCompat implements Pref
     private static final String TAG = "PreferenceFragment";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS).build();
-    private EditTextPreference namePreference;
-    private EditTextPreference registryPreference;
+    private EditTextPreference namePreference, joinPreference;
     private ListPreference listPreference;
-    private EditTextPreference joinPreference;
-    private Preference resetPreference;
-    private Preference versionPreference;
-    private Preference githubPreference;
+    private Preference resetPreference, versionPreference, githubPreference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,80 +51,31 @@ public class PreferenceFragment extends PreferenceFragmentCompat implements Pref
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        Context context = getPreferenceManager().getContext();
-        PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
+        setPreferencesFromResource(R.xml.preferences, rootKey);
 
-        // Device Management
-        PreferenceCategory deviceCategory = new PreferenceCategory(context);
-        deviceCategory.setTitle("Device Management");
-        deviceCategory.setIconSpaceReserved(false);
-        // * Name
-        namePreference = new EditTextPreference(context);
-        bindPreference(namePreference, "device_name", "Name", true, false);
-        namePreference.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        namePreference.setDialogTitle("Rename");
+        namePreference = findPreference("device_name");
         namePreference.setDefaultValue(Build.BRAND + " " + Build.MODEL);
-        // * Registry
-        registryPreference = new EditTextPreference(context);
-        bindPreference(registryPreference, "device_registry", "Registry", true, false);
-        registryPreference.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        registryPreference.setDialogTitle("Address");
-        registryPreference.setDefaultValue(getString(R.string.app_registry));
+        namePreference.setOnPreferenceChangeListener(this);
 
-        // Group Binding
-        PreferenceCategory groupCategory = new PreferenceCategory(context);
-        groupCategory.setTitle("Group Binding");
-        groupCategory.setIconSpaceReserved(false);
-        // * List
+        listPreference = findPreference("group_list");
         String[] entries = getPreferenceManager().getSharedPreferences().getStringSet("group_entries", new HashSet<>()).toArray(new String[0]);
-        listPreference = new ListPreference(context);
-        bindPreference(listPreference, "group_list", "List", true, false);
-        listPreference.setSummaryProvider(p -> "Current " + listPreference.getEntries().length + " groups");
-        listPreference.setDialogTitle("Select to quit");
         listPreference.setEntries(entries);
         listPreference.setEntryValues(entries);
-        // * Join
-        joinPreference = new EditTextPreference(context);
-        bindPreference(joinPreference, "group_join", "Join", true, false);
-        joinPreference.setSummary("Create group if not exist");
-        joinPreference.setDialogTitle("Group ID");
-        // * Reset
-        resetPreference = new Preference(context);
-        bindPreference(resetPreference, "group_reset", "Reset", false, true);
-        resetPreference.setSummary("Quit from all groups");
+        listPreference.setSummaryProvider(p -> "Current " + listPreference.getEntries().length + " groups");
+        listPreference.setOnPreferenceChangeListener(this);
 
-        // About
-        PreferenceCategory aboutCategory = new PreferenceCategory(context);
-        aboutCategory.setTitle("About");
-        aboutCategory.setIconSpaceReserved(false);
-        // * Version
-        versionPreference = new Preference(context);
-        bindPreference(versionPreference, "about_version", "Version", false, true);
+        joinPreference = findPreference("group_join");
+        joinPreference.setOnPreferenceChangeListener(this);
+
+        resetPreference = findPreference("group_reset");
+        resetPreference.setOnPreferenceClickListener(this);
+
+        versionPreference = findPreference("about_version");
         versionPreference.setSummary(BuildConfig.VERSION_NAME);
-        // * GitHub
-        githubPreference = new Preference(context);
-        bindPreference(githubPreference, "about_github", "GitHub", false, true);
-        githubPreference.setSummary(R.string.app_repo);
+        versionPreference.setOnPreferenceClickListener(this);
 
-        screen.addPreference(deviceCategory); // Device Management
-        deviceCategory.addPreference(namePreference); // * Name
-        deviceCategory.addPreference(registryPreference); // * Registry
-        screen.addPreference(groupCategory); // Group Binding
-        groupCategory.addPreference(listPreference); // * List
-        groupCategory.addPreference(joinPreference); // * Join
-        groupCategory.addPreference(resetPreference); // * Reset
-        screen.addPreference(aboutCategory); // About
-        aboutCategory.addPreference(versionPreference); // * Version
-        aboutCategory.addPreference(githubPreference); // * GitHub
-        setPreferenceScreen(screen);
-    }
-
-    private void bindPreference(Preference preference, String key, String title, boolean onChange, boolean onClick) {
-        preference.setKey(key);
-        preference.setTitle(title);
-        preference.setIconSpaceReserved(false);
-        if (onChange) preference.setOnPreferenceChangeListener(this);
-        if (onClick) preference.setOnPreferenceClickListener(this);
+        githubPreference = findPreference("about_github");
+        githubPreference.setOnPreferenceClickListener(this);
     }
 
     @Override
@@ -168,8 +111,6 @@ public class PreferenceFragment extends PreferenceFragmentCompat implements Pref
                     response.close();
                 }
             });
-        } else if (preference.equals(registryPreference)) {
-            Log.d(TAG, "registryPreference: " + registryPreference.getText() + " ==> " + newValue);
         } else if (preference.equals(listPreference)) {
             JSONObject obj = new JSONObject();
             JSONArray arr = new JSONArray();
