@@ -31,13 +31,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.history_item, viewGroup, false);
-        ConstraintLayout base = view.findViewById(R.id.historyItem);
-        ImageView typeView = view.findViewById(R.id.typeView);
-        TextView timeView = view.findViewById(R.id.timeView);
-        TextView contentView = view.findViewById(R.id.contentView);
-        Button copyText = view.findViewById(R.id.copyText);
-        return new ViewHolder(this, base, typeView, timeView, contentView, copyText);
+        ConstraintLayout base = (ConstraintLayout) LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.history_item, viewGroup, false);
+        return new ViewHolder(this, base);
     }
 
     @Override
@@ -75,17 +70,19 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         private final Button copyText;
         private Task task;
 
-        public ViewHolder(HistoryAdapter adapter, ConstraintLayout base, ImageView typeView, TextView timeView, TextView contentView, Button copyText) {
+        public ViewHolder(HistoryAdapter adapter, ConstraintLayout base) {
             super(base);
-            this.adapter = adapter;
+
             this.base = base;
-            base.setOnClickListener(this);
-            base.setOnLongClickListener(this);
-            this.typeView = typeView;
-            this.timeView = timeView;
-            this.contentView = contentView;
-            this.copyText = copyText;
-            copyText.setOnClickListener(this);
+            this.adapter = adapter;
+            this.typeView = base.findViewById(R.id.typeView);
+            this.timeView = base.findViewById(R.id.timeView);
+            this.contentView = base.findViewById(R.id.contentView);
+            this.copyText = base.findViewById(R.id.copyText);
+
+            this.base.setOnClickListener(this);
+            this.base.setOnLongClickListener(this);
+            this.copyText.setOnClickListener(this);
         }
 
         public void setTask(Task task) {
