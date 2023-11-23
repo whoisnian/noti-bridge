@@ -10,23 +10,26 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class HistoryFragment extends Fragment {
-    private final SQLiteDatabase DB;
     public HistoryAdapter adapter;
-
-    public HistoryFragment(SQLiteDatabase DB) {
-        this.DB = DB;
-    }
+    private SQLiteDatabase DB;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        DB = new DatabaseHelper(getContext()).getWritableDatabase();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.history_fragment, container, false);
-        ((RecyclerView) view.findViewById(R.id.historyFragment)).setAdapter(adapter = new HistoryAdapter(DB));
+        RecyclerView view = (RecyclerView) inflater.inflate(R.layout.history_fragment, container, false);
+        view.setAdapter(adapter = new HistoryAdapter(DB));
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        DB.close();
+        super.onDestroy();
     }
 }

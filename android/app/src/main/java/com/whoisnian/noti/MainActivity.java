@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -33,8 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.main_activity);
         setActionBarBackStack();
-        historyFrag = new HistoryFragment(new DatabaseHelper(this).getWritableDatabase());
-        setCurrentFragment(historyFrag, false);
+        setCurrentFragment(historyFrag = new HistoryFragment(), false);
 
         createNotificationChannel();
         checkRequestPermission();
