@@ -24,7 +24,12 @@ func main() {
 	if err := storage.SetupDataDir(global.CFG.StoragePath); err != nil {
 		global.LOG.Fatal(err.Error())
 	}
-	transporter.SetupAndroid(global.CFG.CredentialPath)
+	if err := transporter.SetupFirefox(global.CFG.VAPIDCredFile); err != nil {
+		global.LOG.Warn(err.Error())
+	}
+	if err := transporter.SetupAndroid(global.CFG.FCMCredFile); err != nil {
+		global.LOG.Warn(err.Error())
+	}
 
 	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: router.Setup()}
 	go func() {
