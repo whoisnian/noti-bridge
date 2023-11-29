@@ -1,15 +1,18 @@
 package storage
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
-func UpdateDevice(typ int64, token string, name string) error {
+func UpdateDevice(typ int64, token string, name string, extra json.RawMessage) error {
 	gLocker.Lock()
 	defer gLocker.Unlock()
 
 	now := time.Now().Unix()
 	idx := DeviceIndex{typ, token}
 	if d, ok := gDeviceMap.m[idx]; !ok {
-		gDeviceMap.m[idx] = &Device{typ, token, now, now, name}
+		gDeviceMap.m[idx] = &Device{typ, token, now, now, name, extra}
 	} else {
 		d.ATime = now
 		d.Name = name
@@ -26,14 +29,14 @@ func DeleteDevice(typ int64, token string) error {
 	return nil
 }
 
-func Bind(gids []string, typ int64, token string, name string) error {
+func Bind(gids []string, typ int64, token string, name string, extra json.RawMessage) error {
 	gLocker.Lock()
 	defer gLocker.Unlock()
 
 	now := time.Now().Unix()
 	idx := DeviceIndex{typ, token}
 	if d, ok := gDeviceMap.m[idx]; !ok {
-		gDeviceMap.m[idx] = &Device{typ, token, now, now, name}
+		gDeviceMap.m[idx] = &Device{typ, token, now, now, name, extra}
 	} else {
 		d.ATime = now
 		d.Name = name

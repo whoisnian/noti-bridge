@@ -9,6 +9,7 @@ import (
 
 const (
 	DeviceAndroid = iota
+	DeviceBrowser
 )
 
 type Device struct {
@@ -17,6 +18,7 @@ type Device struct {
 	CTime int64
 	ATime int64
 	Name  string
+	Extra json.RawMessage
 }
 
 type DeviceIndex struct {

@@ -17,6 +17,7 @@ func bindGroupsHandler(store *httpd.Store) {
 		Type  int64
 		Token string
 		Name  string
+		Extra json.RawMessage
 	}{}
 
 	if err := json.NewDecoder(store.R.Body).Decode(&params); err != nil {
@@ -38,7 +39,7 @@ func bindGroupsHandler(store *httpd.Store) {
 		return
 	}
 
-	if err := storage.Bind(params.GIDs, params.Type, params.Token, params.Name); err != nil {
+	if err := storage.Bind(params.GIDs, params.Type, params.Token, params.Name, params.Extra); err != nil {
 		store.W.WriteHeader(http.StatusUnprocessableEntity)
 		store.RespondJson(jsonMap{"msg": err.Error()})
 		return
