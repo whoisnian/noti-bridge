@@ -6,6 +6,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
+	"github.com/whoisnian/noti-bridge/server/storage"
 	"github.com/whoisnian/noti-bridge/server/task"
 	"google.golang.org/api/option"
 )
@@ -27,9 +28,9 @@ func SetupAndroid(filename string) error {
 	return err
 }
 
-func NotifyAndroid(tsk *task.Task, token string) error {
+func NotifyAndroid(tsk *task.Task, dev *storage.Device) error {
 	msg := &messaging.Message{
-		Token: token,
+		Token: dev.Token,
 		Android: &messaging.AndroidConfig{
 			Priority: "high",
 			TTL:      zeroTTL,

@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/whoisnian/noti-bridge/server/global"
+	"github.com/whoisnian/noti-bridge/server/storage"
+	"github.com/whoisnian/noti-bridge/server/task"
 )
 
 var VAPID struct {
@@ -15,7 +17,7 @@ var VAPID struct {
 	PrivateKey string
 }
 
-func SetupFirefox(filename string) error {
+func SetupBrowser(filename string) error {
 	fi, err := os.Open(filename)
 	if os.IsNotExist(err) {
 		global.LOG.Warnf("%s, generating new VAPID", err.Error())
@@ -44,4 +46,8 @@ func generateVAPID(filename string) error {
 	VAPID.PublicKey = base64.RawURLEncoding.EncodeToString(pKey.PublicKey().Bytes())
 	global.LOG.Infof("VAPID.PublicKey: %s", VAPID.PublicKey)
 	return json.NewEncoder(fi).Encode(VAPID)
+}
+
+func NotifyBrowser(tsk *task.Task, dev *storage.Device) error {
+	return nil
 }
