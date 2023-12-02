@@ -21,6 +21,11 @@ type Device struct {
 	Extra json.RawMessage
 }
 
+type BrowserExtra struct {
+	Auth   []byte
+	P256dh []byte
+}
+
 type DeviceIndex struct {
 	Type  int64
 	Token string

@@ -16,6 +16,7 @@ func UpdateDevice(typ int64, token string, name string, extra json.RawMessage) e
 	} else {
 		d.ATime = now
 		d.Name = name
+		d.Extra = extra
 	}
 	return nil
 }
