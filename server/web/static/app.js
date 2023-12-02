@@ -1,7 +1,9 @@
-const arrayBufferToHex = (buffer) => {
-  return [...new Uint8Array(buffer)]
-    .map(x => x.toString(16).padStart(2, '0'))
-    .join('')
+const arrayBufferToB64 = (buffer) => {
+  return window.btoa(
+    new Uint8Array(buffer).reduce((res, b) => {
+      return res + String.fromCharCode(b)
+    }, '')
+  )
 }
 
 (async () => {
@@ -35,8 +37,8 @@ const arrayBufferToHex = (buffer) => {
       Token: sub.endpoint,
       Name,
       Extra: {
-        Auth: arrayBufferToHex(sub.getKey('auth')),
-        P256dh: arrayBufferToHex(sub.getKey('p256dh'))
+        Auth: arrayBufferToB64(sub.getKey('auth')),
+        P256dh: arrayBufferToB64(sub.getKey('p256dh'))
       }
     })
   })

@@ -1,53 +1,67 @@
 package transporter
 
 import (
-	"crypto/ecdh"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
+	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/whoisnian/noti-bridge/server/global"
 	"github.com/whoisnian/noti-bridge/server/storage"
 	"github.com/whoisnian/noti-bridge/server/task"
 )
 
-var VAPID struct {
-	PublicKey  string
-	PrivateKey string
+func BrowserServerKey() string {
+	return vapidCred.PublicKey
 }
 
 func SetupBrowser(filename string) error {
 	fi, err := os.Open(filename)
 	if os.IsNotExist(err) {
-		global.LOG.Warnf("%s, generating new VAPID", err.Error())
+		global.LOG.Warnf("%s, generating new VAPID credential", err.Error())
 		return generateVAPID(filename)
 	} else if err != nil {
 		return err
 	}
 	defer fi.Close()
-	return json.NewDecoder(fi).Decode(&VAPID)
-}
-
-func generateVAPID(filename string) error {
-	fi, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer fi.Close()
-
-	curve := ecdh.P256()
-	pKey, err := curve.GenerateKey(rand.Reader)
-	if err != nil {
-		return err
-	}
-	VAPID.PrivateKey = base64.RawURLEncoding.EncodeToString(pKey.Bytes())
-	global.LOG.Infof("VAPID.PrivateKey: %s", VAPID.PrivateKey)
-	VAPID.PublicKey = base64.RawURLEncoding.EncodeToString(pKey.PublicKey().Bytes())
-	global.LOG.Infof("VAPID.PublicKey: %s", VAPID.PublicKey)
-	return json.NewEncoder(fi).Encode(VAPID)
+	return json.NewDecoder(fi).Decode(&vapidCred)
 }
 
 func NotifyBrowser(tsk *task.Task, dev *storage.Device) error {
-	return nil
+	payload, err := json.Marshal(tsk)
+	if err != nil {
+		return err
+	}
+
+	extra := storage.BrowserExtra{}
+	if err := json.Unmarshal(dev.Extra, &extra); err != nil {
+		return err
+	}
+
+	body, err := vapidECE(payload, extra.Auth, extra.P256dh)
+	if err != nil {
+		return err
+	}
+
+	authHeader, err := vapidAuthHeader(dev.Token)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", dev.Token, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", authHeader)
+	req.Header.Set("Content-Encoding", "aes128gcm")
+	req.Header.Set("Content-Length", strconv.Itoa(body.Len()))
+	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("TTL", "0")
+	req.Header.Set("Urgency", "high")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	return resp.Body.Close()
 }

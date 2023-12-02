@@ -57,5 +57,5 @@ func staticHandler(store *httpd.Store) {
 }
 
 func serverKeyHandler(store *httpd.Store) {
-	store.Respond200([]byte(transporter.ApplicationServerKey()))
+	store.Respond200([]byte(transporter.BrowserServerKey()))
 }
