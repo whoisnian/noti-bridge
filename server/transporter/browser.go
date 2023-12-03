@@ -2,6 +2,7 @@ package transporter
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -62,6 +63,10 @@ func NotifyBrowser(tsk *task.Task, dev *storage.Device) error {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
+	}
+	if global.CFG.Debug {
+		res, err := io.ReadAll(resp.Body)
+		global.LOG.Debugf("NotifyBrowser result: %s %v %s", resp.Status, err, string(res))
 	}
 	return resp.Body.Close()
 }

@@ -6,6 +6,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
+	"github.com/whoisnian/noti-bridge/server/global"
 	"github.com/whoisnian/noti-bridge/server/storage"
 	"github.com/whoisnian/noti-bridge/server/task"
 	"google.golang.org/api/option"
@@ -38,6 +39,7 @@ func NotifyAndroid(tsk *task.Task, dev *storage.Device) error {
 		},
 	}
 
-	_, err := fcmClient.Send(context.Background(), msg)
+	result, err := fcmClient.Send(context.Background(), msg)
+	global.LOG.Debugf("NotifyAndroid result: %s", result)
 	return err
 }
