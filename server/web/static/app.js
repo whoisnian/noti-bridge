@@ -6,6 +6,29 @@ const arrayBufferToB64 = (buffer) => {
   )
 }
 
+let DB = null
+const openDB = async () => {
+  if (DB != null) return DB
+  return new Promise((resolve, reject) => {
+    const openDBRequest = window.indexedDB.open('noti.db', 1)
+    openDBRequest.onerror = reject
+    openDBRequest.onsuccess = e => resolve(DB = e.target.result)
+    openDBRequest.onupgradeneeded = e => e.target.result.createObjectStore('tasks', { autoIncrement: true })
+  })
+}
+
+const getAllTasks = async () => {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction('tasks', 'readwrite')
+      .objectStore('tasks')
+      .getAll()
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
 (async () => {
   if (!('serviceWorker' in navigator)) {
     return window.alert('This browser does not support service worker.')
@@ -15,6 +38,9 @@ const arrayBufferToB64 = (buffer) => {
     const perm = await Notification.requestPermission()
     if (perm !== 'granted') return window.alert('Missing notification permission.')
   }
+
+  const tasks = await getAllTasks()
+  console.log(tasks)
 
   const resp1 = await fetch('/server-key')
   if (resp1.status != 200) return window.alert('get /server-key error: ', resp1.statusText)

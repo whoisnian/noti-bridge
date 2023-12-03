@@ -1,3 +1,26 @@
+let DB = null
+const openDB = async () => {
+  if (DB != null) return DB
+  return new Promise((resolve, reject) => {
+    const openDBRequest = self.indexedDB.open('noti.db', 1)
+    openDBRequest.onerror = reject
+    openDBRequest.onsuccess = e => resolve(DB = e.target.result)
+    openDBRequest.onupgradeneeded = e => e.target.result.createObjectStore('tasks', { autoIncrement: true })
+  })
+}
+
+const addTask = async (data) => {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction('tasks', 'readwrite')
+      .objectStore('tasks')
+      .add({ ...data, CTime: (new Date()).getTime() })
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.result)
+  })
+}
+
 self.addEventListener('notificationclick', event => {
   console.log('notification clicked', event)
   event.notification.close()
@@ -12,12 +35,16 @@ self.addEventListener('notificationclick', event => {
 
 self.addEventListener('push', event => {
   console.log('push message received', event)
+  const data = event.data?.json()
+  if (!data) return
+
+  event.waitUntil(addTask(data))
+
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     console.error('missing notification permission in service worker')
     return
   }
 
-  const data = event.data?.json() ?? {}
   const { Type, Text, Link } = data
   let Title = data.Title ?? ''
   const options = { data }
