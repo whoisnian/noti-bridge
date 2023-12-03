@@ -44,7 +44,7 @@ func newDeviceMap() *DeviceMap {
 }
 
 func (*DeviceMap) fName() string {
-	return "devices.json"
+	return "devices.jsonl"
 }
 
 func (dm *DeviceMap) loadFrom(fPath string) error {

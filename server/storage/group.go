@@ -23,7 +23,7 @@ func newGroupMap() *GroupMap {
 }
 
 func (*GroupMap) fName() string {
-	return "groups.json"
+	return "groups.jsonl"
 }
 
 func (gm *GroupMap) loadFrom(fPath string) error {
