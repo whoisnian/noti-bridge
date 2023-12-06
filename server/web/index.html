@@ -5,11 +5,104 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>noti-bridge</title>
+  <style>
+    body {
+      font-family: ui-monospace, Menlo, Consolas, Hack, "Liberation Mono", "Microsoft Yahei", "Noto Sans Mono CJK SC", sans-serif;
+      line-height: 1.5;
+      margin: 50px auto;
+      padding: 30px 30px 0 30px;
+      width: 80%;
+      max-width: 800px;
+      border: 1px solid #000000;
+      border-radius: 8px;
+    }
+
+    button {
+      font-family: inherit;
+      background-color: #e9e9ed;
+      border: none;
+      border-radius: 2px;
+      padding: 5px 10px;
+    }
+
+    button:hover {
+      background-color: #d0d0d7;
+    }
+
+    button:active {
+      background-color: #b1b1b9;
+    }
+
+    dialog {
+      border-radius: 8px;
+      border-width: 2px;
+    }
+
+    dialog table tr td {
+      padding: 2px 8px;
+    }
+  </style>
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <main id="root"></main>
+  <main>
+    <span>Subscription Status:</span>
+    <span id="status_span" style="font-weight:bold;display:inline-block;width:4em;"></span>
+    <button id="status_btn" style="width:9em;">subscribe</button>
+    <br /><br />
+    <button id="clear_btn">clear</button> <button id="manage_btn">manage</button>
+    <br />
+    <ul id="tasks_ul">
+      <!-- <li>
+        <span style="font-weight:bold;">PING</span>
+        <span>on 2023-12-01 01:02:03</span>
+        <button>delete</button>
+      </li><br />
+      <li>
+        <span style="font-weight:bold;">LINK</span>
+        <span>on 2023-12-01 01:02:03</span>
+        <button>copy</button> <button>delete</button>
+        <div>链接标题</div>
+        <div><a href="https://github.com/whoisnian/noti-bridge">https://github.com/whoisnian/noti-bridge</a></div>
+      </li><br />
+      <li>
+        <span style="font-weight:bold;">TEXT</span>
+        <span>on 2023-12-01 01:02:03</span>
+        <button>copy</button> <button>delete</button>
+        <div>文本标题</div>
+        <div>通知内容示例</div>
+      </li><br /> -->
+    </ul>
+    <dialog id="manage_dialog">
+      <table id="manage_table">
+        <tr>
+          <td colspan="2"><span style="font-weight:bold;">Group Binding</span></td>
+        </tr>
+        <tr>
+          <td>
+            <form id="join_form">
+              <input id="join_text" type="text" autocomplete="off" required=""
+                style="width:100%;box-sizing:border-box;" />
+            </form>
+          </td>
+          <td><button id="join_btn" form="join_form">join</button></td>
+        </tr>
+        <tr>
+          <td><span>569cca252343ccf96d4f0f5f414de620</span></td>
+          <td><button>quit</button></td>
+        </tr>
+        <tr>
+          <td><span>cba9d8ac7c591d540a8f0c9362918a67</span></td>
+          <td><button>quit</button></td>
+        </tr>
+        <tr>
+          <td><span>b355cca187d10d9b380cb442be73dfe8</span></td>
+          <td><button>quit</button></td>
+        </tr>
+      </table>
+    </dialog>
+  </main>
   <script src="/static/app.js"></script>
 </body>
 
