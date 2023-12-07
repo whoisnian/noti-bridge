@@ -32,8 +32,21 @@ const createElement = (tag, options = {}) => {
   return element
 }
 
-const createTaskLi = ({ Type, Title, Text, Link, CTime }) => {
+const copyText = (text) => {
+  if (window.navigator && window.isSecureContext) {
+    window.navigator.clipboard.writeText(text)
+  } else {
+    const input = createElement('input', { type: 'text', style: 'position:fixed;', value: text })
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    input.remove()
+  }
+}
+
+const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   const li = createElement('li')
+  const br = createElement('br')
 
   const typeSpan = createElement('span', { style: 'font-weight:bold;' })
   typeSpan.textContent = Type.toUpperCase()
@@ -46,17 +59,21 @@ const createTaskLi = ({ Type, Title, Text, Link, CTime }) => {
   if (Type !== 'ping') {
     const copyBtn = createElement('button')
     copyBtn.textContent = 'copy'
+    copyBtn.onclick = (e) => copyText(Type === 'link' ? Link : Text)
     li.appendChild(copyBtn)
     li.appendChild(document.createTextNode(' '))
   }
 
   const deleteBtn = createElement('button')
   deleteBtn.textContent = 'delete'
+  deleteBtn.onclick = async (e) => {
+    parent.removeChild(li)
+    parent.removeChild(br)
+    await deleteTask(_id)
+  }
   li.appendChild(deleteBtn)
 
-  if (Type === 'ping') return li
-
-  if (Title.length > 0) {
+  if (['link', 'text'].includes(Type) && Title.length > 0) {
     const titleDiv = createElement('div')
     titleDiv.textContent = htmlEscape(Title)
     li.appendChild(titleDiv)
@@ -72,6 +89,9 @@ const createTaskLi = ({ Type, Title, Text, Link, CTime }) => {
     textDiv.textContent = htmlEscape(Text)
     li.appendChild(textDiv)
   }
+
+  parent.appendChild(li)
+  parent.appendChild(br)
   return li
 }
 
@@ -92,7 +112,28 @@ const getAllTasks = async () => {
     const request = db
       .transaction('tasks', 'readwrite')
       .objectStore('tasks')
-      .getAll()
+      .openCursor()
+    const tasks = []
+    request.onerror = reject
+    request.onsuccess = (e) => {
+      const cursor = e.target.result
+      if (cursor) {
+        tasks.unshift({ ...cursor.value, _id: cursor.key })
+        cursor.continue()
+      } else {
+        resolve(tasks)
+      }
+    }
+  })
+}
+
+const deleteTask = async (key) => {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction('tasks', 'readwrite')
+      .objectStore('tasks')
+      .delete(key)
     request.onerror = reject
     request.onsuccess = e => resolve(e.target.result)
   })
@@ -196,10 +237,7 @@ const deleteDevice = async (sub) => {
   }
 
   const tasks = await getAllTasks()
-  tasks.forEach(task => {
-    tasksUl.appendChild(createTaskLi(task))
-    tasksUl.appendChild(document.createElement('br'))
-  })
+  tasks.forEach(task => appendTaskLi(tasksUl, task))
 
   manageDialog.onclick = async (e) => {
     if (e.target !== manageDialog) return
