@@ -1,23 +1,30 @@
 let DB = null
+const TASKS = 'tasks'
+const GROUPS = 'groups'
+const KV = 'kv'
 const openDB = async () => {
   if (DB != null) return DB
   return new Promise((resolve, reject) => {
     const openDBRequest = self.indexedDB.open('noti.db', 1)
     openDBRequest.onerror = reject
     openDBRequest.onsuccess = e => resolve(DB = e.target.result)
-    openDBRequest.onupgradeneeded = e => e.target.result.createObjectStore('tasks', { autoIncrement: true })
+    openDBRequest.onupgradeneeded = e => {
+      e.target.result.createObjectStore(TASKS, { autoIncrement: true })
+      e.target.result.createObjectStore(GROUPS, { autoIncrement: true })
+      e.target.result.createObjectStore(KV)
+    }
   })
 }
 
-const addTask = async (data) => {
-  const db = await openDB()
+const dbAddOne = async (name, value) => {
+  const db = await dbOpen()
   return new Promise((resolve, reject) => {
     const request = db
-      .transaction('tasks', 'readwrite')
-      .objectStore('tasks')
-      .add({ ...data, CTime: (new Date()).getTime() })
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .add(value)
     request.onerror = reject
-    request.onsuccess = e => resolve(e.result)
+    request.onsuccess = e => resolve(e.target.result)
   })
 }
 
@@ -38,7 +45,7 @@ self.addEventListener('push', event => {
   const data = event.data?.json()
   if (!data) return
 
-  event.waitUntil(addTask(data))
+  event.waitUntil(dbAddOne(TASKS, { ...data, CTime: (new Date()).getTime() }))
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     console.error('missing notification permission in service worker')

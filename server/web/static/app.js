@@ -44,7 +44,7 @@ const copyText = (text) => {
   }
 }
 
-const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
+const appendTaskLi = (parent, key, { Type, Title, Text, Link, CTime }) => {
   const li = createElement('li')
   const br = createElement('br')
 
@@ -69,7 +69,7 @@ const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   deleteBtn.onclick = async (e) => {
     parent.removeChild(li)
     parent.removeChild(br)
-    await deleteTask(_id)
+    await dbDeleteOne(TASKS, key)
   }
   li.appendChild(deleteBtn)
 
@@ -95,56 +95,84 @@ const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   return li
 }
 
+const appendGroupTr = (parent, key, gid) => {
+  const tr = createElement('tr')
+
+  const td1 = createElement('td')
+  td1.textContent = gid
+  tr.appendChild(td1)
+
+  const td2 = createElement('td')
+  const deleteBtn = createElement('button')
+  deleteBtn.textContent = 'delete'
+  deleteBtn.onclick = async (e) => {
+    parent.removeChild(tr)
+    await dbDeleteOne(GROUPS, key)
+  }
+  td2.appendChild(deleteBtn)
+  tr.appendChild(td2)
+
+  parent.appendChild(tr)
+  return tr
+}
+
 let DB = null
-const openDB = async () => {
+const TASKS = 'tasks'
+const GROUPS = 'groups'
+const KV = 'kv'
+const dbOpen = async () => {
   if (DB != null) return DB
   return new Promise((resolve, reject) => {
     const openDBRequest = self.indexedDB.open('noti.db', 1)
     openDBRequest.onerror = reject
     openDBRequest.onsuccess = e => resolve(DB = e.target.result)
-    openDBRequest.onupgradeneeded = e => e.target.result.createObjectStore('tasks', { autoIncrement: true })
+    openDBRequest.onupgradeneeded = e => {
+      e.target.result.createObjectStore(TASKS, { autoIncrement: true })
+      e.target.result.createObjectStore(GROUPS, { autoIncrement: true })
+      e.target.result.createObjectStore(KV)
+    }
   })
 }
 
-const getAllTasks = async () => {
-  const db = await openDB()
+const dbGetAll = async (name) => {
+  const db = await dbOpen()
   return new Promise((resolve, reject) => {
     const request = db
-      .transaction('tasks', 'readwrite')
-      .objectStore('tasks')
+      .transaction(name, 'readwrite')
+      .objectStore(name)
       .openCursor()
-    const tasks = []
+    const results = []
     request.onerror = reject
     request.onsuccess = (e) => {
       const cursor = e.target.result
       if (cursor) {
-        tasks.unshift({ ...cursor.value, _id: cursor.key })
+        results.unshift({ key: cursor.key, value: cursor.value })
         cursor.continue()
       } else {
-        resolve(tasks)
+        resolve(results)
       }
     }
   })
 }
 
-const deleteTask = async (key) => {
-  const db = await openDB()
+const dbDeleteOne = async (name, key) => {
+  const db = await dbOpen()
   return new Promise((resolve, reject) => {
     const request = db
-      .transaction('tasks', 'readwrite')
-      .objectStore('tasks')
+      .transaction(name, 'readwrite')
+      .objectStore(name)
       .delete(key)
     request.onerror = reject
     request.onsuccess = e => resolve(e.target.result)
   })
 }
 
-const deleteAllTasks = async () => {
-  const db = await openDB()
+const dbDeleteAll = async (name) => {
+  const db = await dbOpen()
   return new Promise((resolve, reject) => {
     const request = db
-      .transaction('tasks', 'readwrite')
-      .objectStore('tasks')
+      .transaction(name, 'readwrite')
+      .objectStore(name)
       .clear()
     request.onerror = reject
     request.onsuccess = e => resolve(e.target.result)
@@ -176,6 +204,24 @@ const deleteDevice = async (sub) => {
     body: JSON.stringify({ Type: 1, Token: sub.endpoint })
   })
   if (resp.status != 200) window.alert('delete /api/device error: ', resp.statusText)
+}
+
+const bindGroups = async (ids) => {
+  const resp = await window.fetch('/api/group', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ GIDs: ids, Type: 1, Token: sub.endpoint, Name, Extra })
+  })
+  if (resp.status != 200) window.alert('put /api/group error: ', resp.statusText)
+}
+
+const unbindGroups = async (ids) => {
+  const resp = await window.fetch('/api/group', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ GIDs: ids, Type: 1, Token: sub.endpoint })
+  })
+  if (resp.status != 200) window.alert('delete /api/group error: ', resp.statusText)
 }
 
 (async () => {
@@ -230,14 +276,17 @@ const deleteDevice = async (sub) => {
   clearBtn.onclick = async (e) => {
     while (tasksUl.firstChild)
       tasksUl.removeChild(tasksUl.firstChild)
-    await deleteAllTasks()
+    await dbDeleteAll(TASKS)
   }
   manageBtn.onclick = async (e) => {
     manageDialog.showModal()
   }
 
-  const tasks = await getAllTasks()
-  tasks.forEach(task => appendTaskLi(tasksUl, task))
+  const tasks = await dbGetAll(TASKS)
+  tasks.forEach(task => appendTaskLi(tasksUl, task.key, task.value))
+
+  const groups = await dbGetAll(GROUPS)
+  groups.forEach(group => appendGroupTr(manageTable, group.key, group.value))
 
   manageDialog.onclick = async (e) => {
     if (e.target !== manageDialog) return
