@@ -1,3 +1,71 @@
+// ========================= indexedDB =========================
+let DB = null
+const TASKS = 'tasks'
+const GROUPS = 'groups'
+const KV = 'kv'
+const dbOpen = async () => {
+  if (DB != null) return DB
+  return new Promise((resolve, reject) => {
+    const openDBRequest = self.indexedDB.open('noti.db', 1)
+    openDBRequest.onerror = reject
+    openDBRequest.onsuccess = e => resolve(DB = e.target.result)
+    openDBRequest.onupgradeneeded = e => {
+      e.target.result.createObjectStore(TASKS, { keyPath: '_id', autoIncrement: true })
+      e.target.result.createObjectStore(GROUPS, { keyPath: '_id', autoIncrement: true })
+      e.target.result.createObjectStore(KV)
+    }
+  })
+}
+
+const dbAdd = async (name, value) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .add(value)
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
+const dbDelete = async (name, key) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .delete(key)
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
+const dbGetAll = async (name) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .getAll()
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
+const dbDeleteAll = async (name) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .clear()
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
+// ========================= utility =========================
 const arrayBufferToB64 = (buffer) => {
   return window.btoa(
     new Uint8Array(buffer).reduce((res, b) => {
@@ -24,10 +92,13 @@ const dateStr = (date) => `${date.getFullYear()}-` +
   `${('0' + date.getMinutes()).slice(-2)}:` +
   `${('0' + date.getSeconds()).slice(-2)}`
 
+// ========================= element =========================
 const createElement = (tag, options = {}) => {
   const element = document.createElement(tag)
   Object.entries(options).forEach(([k, v]) => {
-    element.setAttribute(k, v)
+    if (k === 'text') element.textContent = v
+    else if (k === 'onclick') element.onclick = v
+    else element.setAttribute(k, v)
   })
   return element
 }
@@ -44,50 +115,38 @@ const copyText = (text) => {
   }
 }
 
-const appendTaskLi = (parent, key, { Type, Title, Text, Link, CTime }) => {
+const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   const li = createElement('li')
   const br = createElement('br')
 
-  const typeSpan = createElement('span', { style: 'font-weight:bold;' })
-  typeSpan.textContent = Type.toUpperCase()
-  li.appendChild(typeSpan)
-
-  const dateSpan = createElement('span')
-  dateSpan.textContent = ` on ${dateStr(new Date(CTime))} `
-  li.appendChild(dateSpan)
+  li.appendChild(createElement('span', { style: 'font-weight:bold;', text: Type.toUpperCase() }))
+  li.appendChild(createElement('span', { text: ` on ${dateStr(new Date(CTime))} ` }))
 
   if (Type !== 'ping') {
-    const copyBtn = createElement('button')
-    copyBtn.textContent = 'copy'
-    copyBtn.onclick = (e) => copyText(Type === 'link' ? Link : Text)
-    li.appendChild(copyBtn)
+    li.appendChild(createElement('button', {
+      text: 'copy',
+      onclick: (e) => copyText(Type === 'link' ? Link : Text)
+    }))
     li.appendChild(document.createTextNode(' '))
   }
 
-  const deleteBtn = createElement('button')
-  deleteBtn.textContent = 'delete'
-  deleteBtn.onclick = async (e) => {
-    parent.removeChild(li)
-    parent.removeChild(br)
-    await dbDeleteOne(TASKS, key)
-  }
-  li.appendChild(deleteBtn)
+  li.appendChild(createElement('button', {
+    text: 'delete', onclick: async (e) => {
+      parent.removeChild(li)
+      parent.removeChild(br)
+      await dbDelete(TASKS, _id)
+    }
+  }))
 
   if (['link', 'text'].includes(Type) && Title.length > 0) {
-    const titleDiv = createElement('div')
-    titleDiv.textContent = htmlEscape(Title)
-    li.appendChild(titleDiv)
+    li.appendChild(createElement('div', { text: htmlEscape(Title) }))
   }
   if (Type === 'link') {
     const linkDiv = createElement('div')
-    const aLink = createElement('a', { href: Link })
-    aLink.textContent = htmlEscape(Link)
-    linkDiv.appendChild(aLink)
+    linkDiv.appendChild(createElement('a', { href: Link, text: htmlEscape(Link) }))
     li.appendChild(linkDiv)
   } else if (Type === 'text') {
-    const textDiv = createElement('div')
-    textDiv.textContent = htmlEscape(Text)
-    li.appendChild(textDiv)
+    li.appendChild(createElement('div', { text: htmlEscape(Text) }))
   }
 
   parent.appendChild(li)
@@ -95,90 +154,25 @@ const appendTaskLi = (parent, key, { Type, Title, Text, Link, CTime }) => {
   return li
 }
 
-const appendGroupTr = (parent, key, gid) => {
+const appendGroupTr = (parent, { gid, _id }) => {
   const tr = createElement('tr')
 
-  const td1 = createElement('td')
-  td1.textContent = gid
-  tr.appendChild(td1)
+  tr.appendChild(createElement('td', { text: gid }))
 
-  const td2 = createElement('td')
-  const deleteBtn = createElement('button')
-  deleteBtn.textContent = 'delete'
-  deleteBtn.onclick = async (e) => {
-    parent.removeChild(tr)
-    await dbDeleteOne(GROUPS, key)
-  }
-  td2.appendChild(deleteBtn)
-  tr.appendChild(td2)
+  const td = createElement('td')
+  td.appendChild(createElement('button', {
+    text: 'delete', onclick: async (e) => {
+      parent.removeChild(tr)
+      await dbDelete(GROUPS, _id)
+    }
+  }))
+  tr.appendChild(td)
 
   parent.appendChild(tr)
   return tr
 }
 
-let DB = null
-const TASKS = 'tasks'
-const GROUPS = 'groups'
-const KV = 'kv'
-const dbOpen = async () => {
-  if (DB != null) return DB
-  return new Promise((resolve, reject) => {
-    const openDBRequest = self.indexedDB.open('noti.db', 1)
-    openDBRequest.onerror = reject
-    openDBRequest.onsuccess = e => resolve(DB = e.target.result)
-    openDBRequest.onupgradeneeded = e => {
-      e.target.result.createObjectStore(TASKS, { autoIncrement: true })
-      e.target.result.createObjectStore(GROUPS, { autoIncrement: true })
-      e.target.result.createObjectStore(KV)
-    }
-  })
-}
-
-const dbGetAll = async (name) => {
-  const db = await dbOpen()
-  return new Promise((resolve, reject) => {
-    const request = db
-      .transaction(name, 'readwrite')
-      .objectStore(name)
-      .openCursor()
-    const results = []
-    request.onerror = reject
-    request.onsuccess = (e) => {
-      const cursor = e.target.result
-      if (cursor) {
-        results.unshift({ key: cursor.key, value: cursor.value })
-        cursor.continue()
-      } else {
-        resolve(results)
-      }
-    }
-  })
-}
-
-const dbDeleteOne = async (name, key) => {
-  const db = await dbOpen()
-  return new Promise((resolve, reject) => {
-    const request = db
-      .transaction(name, 'readwrite')
-      .objectStore(name)
-      .delete(key)
-    request.onerror = reject
-    request.onsuccess = e => resolve(e.target.result)
-  })
-}
-
-const dbDeleteAll = async (name) => {
-  const db = await dbOpen()
-  return new Promise((resolve, reject) => {
-    const request = db
-      .transaction(name, 'readwrite')
-      .objectStore(name)
-      .clear()
-    request.onerror = reject
-    request.onsuccess = e => resolve(e.target.result)
-  })
-}
-
+// ========================= server api =========================
 const updateDevice = async (sub) => {
   const regexF = /Firefox\/\d+/i
   const regexC = /Chrome\/\d+/i
@@ -224,6 +218,7 @@ const unbindGroups = async (ids) => {
   if (resp.status != 200) window.alert('delete /api/group error: ', resp.statusText)
 }
 
+// ========================= main =========================
 (async () => {
   if (!('serviceWorker' in navigator)) {
     return window.alert('This browser does not support service worker.')
@@ -237,6 +232,7 @@ const unbindGroups = async (ids) => {
 
   const statusSpan = document.getElementById('status_span')
   const statusBtn = document.getElementById('status_btn')
+  const reloadBtn = document.getElementById('reload_btn')
   const clearBtn = document.getElementById('clear_btn')
   const manageBtn = document.getElementById('manage_btn')
   const tasksUl = document.getElementById('tasks_ul')
@@ -273,6 +269,7 @@ const unbindGroups = async (ids) => {
     await updateDevice(sub)
   }
 
+  reloadBtn.onclick = (e) => window.location.reload()
   clearBtn.onclick = async (e) => {
     while (tasksUl.firstChild)
       tasksUl.removeChild(tasksUl.firstChild)

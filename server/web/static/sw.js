@@ -1,22 +1,23 @@
+// ========================= indexedDB =========================
 let DB = null
 const TASKS = 'tasks'
 const GROUPS = 'groups'
 const KV = 'kv'
-const openDB = async () => {
+const dbOpen = async () => {
   if (DB != null) return DB
   return new Promise((resolve, reject) => {
     const openDBRequest = self.indexedDB.open('noti.db', 1)
     openDBRequest.onerror = reject
     openDBRequest.onsuccess = e => resolve(DB = e.target.result)
     openDBRequest.onupgradeneeded = e => {
-      e.target.result.createObjectStore(TASKS, { autoIncrement: true })
-      e.target.result.createObjectStore(GROUPS, { autoIncrement: true })
+      e.target.result.createObjectStore(TASKS, { keyPath: '_id', autoIncrement: true })
+      e.target.result.createObjectStore(GROUPS, { keyPath: '_id', autoIncrement: true })
       e.target.result.createObjectStore(KV)
     }
   })
 }
 
-const dbAddOne = async (name, value) => {
+const dbAdd = async (name, value) => {
   const db = await dbOpen()
   return new Promise((resolve, reject) => {
     const request = db
@@ -28,6 +29,7 @@ const dbAddOne = async (name, value) => {
   })
 }
 
+// ========================= notification clicked =========================
 self.addEventListener('notificationclick', event => {
   console.log('notification clicked', event)
   event.notification.close()
@@ -35,17 +37,18 @@ self.addEventListener('notificationclick', event => {
   const data = event.notification.data
   if (event.action === 'open' && data.Type === 'link') {
     event.waitUntil(self.clients.openWindow(data.Link))
-  } else if (data.Type === 'link') {
+  } else {
     event.waitUntil(self.clients.openWindow('/web'))
   }
 })
 
+// ========================= message received =========================
 self.addEventListener('push', event => {
   console.log('push message received', event)
   const data = event.data?.json()
   if (!data) return
 
-  event.waitUntil(dbAddOne(TASKS, { ...data, CTime: (new Date()).getTime() }))
+  event.waitUntil(dbAdd(TASKS, { ...data, CTime: (new Date()).getTime() }))
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     console.error('missing notification permission in service worker')

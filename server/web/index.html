@@ -51,7 +51,9 @@
     <span id="status_span" style="font-weight:bold;display:inline-block;width:4em;"></span>
     <button id="status_btn" style="width:9em;">subscribe</button>
     <br /><br />
-    <button id="clear_btn">clear</button> <button id="manage_btn">manage</button>
+    <button id="reload_btn">reload</button>
+    <button id="clear_btn">clear</button>
+    <button id="manage_btn">manage</button>
     <br />
     <ul id="tasks_ul"></ul>
     <dialog id="manage_dialog">
@@ -61,10 +63,8 @@
         </tr>
         <tr>
           <td>
-            <form id="join_form">
-              <input id="join_text" type="text" autocomplete="off" required=""
-                style="width:100%;box-sizing:border-box;" />
-            </form>
+            <form id="join_form"><input id="join_text" type="text" autocomplete="off" required=""
+                style="width:100%;box-sizing:border-box;" /> </form>
           </td>
           <td><button id="join_btn" form="join_form">join</button></td>
         </tr>
