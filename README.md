@@ -3,6 +3,9 @@
 ## Android preview
 <img src="doc/assets/android_main.webp" alt="android_main.webp" width="240"/> <img src="doc/assets/android_settings.webp" alt="android_settings.webp" width="240"/>
 
+## Browser preview
+<img src="doc/assets/browser_main.webp" alt="browser_main.webp" width="480"/>
+
 ## FCM configuration
 1. Sign up for a [Firebase account](https://console.firebase.google.com)
 2. Create a Firebase project in the Firebase console
