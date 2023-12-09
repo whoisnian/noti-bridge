@@ -29,6 +29,30 @@ const dbAdd = async (name, value) => {
   })
 }
 
+const dbGet = async (name, key) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .get(key)
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
+const dbPut = async (name, value, key) => {
+  const db = await dbOpen()
+  return new Promise((resolve, reject) => {
+    const request = db
+      .transaction(name, 'readwrite')
+      .objectStore(name)
+      .put(value, key)
+    request.onerror = reject
+    request.onsuccess = e => resolve(e.target.result)
+  })
+}
+
 const dbDelete = async (name, key) => {
   const db = await dbOpen()
   return new Promise((resolve, reject) => {
@@ -174,28 +198,27 @@ const appendGroupTr = (parent, { gid, _id }) => {
 
 // ========================= server api =========================
 const updateDevice = async (sub) => {
-  const regexF = /Firefox\/\d+/i
-  const regexC = /Chrome\/\d+/i
+  await dbPut(KV, sub.endpoint, 'token')
+  await dbPut(KV, { Auth: arrayBufferToB64(sub.getKey('auth')), P256dh: arrayBufferToB64(sub.getKey('p256dh')) }, 'extra')
+
   const resp = await window.fetch('/api/device', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      Type: 1, Token: sub.endpoint,
-      Name: regexF.exec(navigator.userAgent)?.[0] ?? regexC.exec(navigator.userAgent)?.[0] ?? 'Other',
-      Extra: {
-        Auth: arrayBufferToB64(sub.getKey('auth')),
-        P256dh: arrayBufferToB64(sub.getKey('p256dh'))
-      }
+      Type: 1,
+      Token: await dbGet(KV, 'token'),
+      Name: await dbGet(KV, 'name'),
+      Extra: await dbGet(KV, 'extra')
     })
   })
   if (resp.status != 200) window.alert('post /api/device error: ', resp.statusText)
 }
 
-const deleteDevice = async (sub) => {
+const deleteDevice = async () => {
   const resp = await window.fetch('/api/device', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ Type: 1, Token: sub.endpoint })
+    body: JSON.stringify({ Type: 1, Token: await dbGet(KV, 'token') })
   })
   if (resp.status != 200) window.alert('delete /api/device error: ', resp.statusText)
 }
@@ -204,7 +227,13 @@ const bindGroups = async (ids) => {
   const resp = await window.fetch('/api/group', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ GIDs: ids, Type: 1, Token: sub.endpoint, Name, Extra })
+    body: JSON.stringify({
+      GIDs: ids,
+      Type: 1,
+      Token: await dbGet(KV, 'token'),
+      Name: await dbGet(KV, 'name'),
+      Extra: await dbGet(KV, 'extra')
+    })
   })
   if (resp.status != 200) window.alert('put /api/group error: ', resp.statusText)
 }
@@ -213,7 +242,7 @@ const unbindGroups = async (ids) => {
   const resp = await window.fetch('/api/group', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ GIDs: ids, Type: 1, Token: sub.endpoint })
+    body: JSON.stringify({ GIDs: ids, Type: 1, Token: await dbGet(KV, 'token') })
   })
   if (resp.status != 200) window.alert('delete /api/group error: ', resp.statusText)
 }
@@ -230,6 +259,11 @@ const unbindGroups = async (ids) => {
   if (resp.status != 200) return window.alert('get /server-key error: ', resp.statusText)
   const applicationServerKey = await resp.text()
 
+  const name = await dbGet(KV, 'name')
+  if (!name) {
+    await dbPut(KV, (/Firefox\/\d+/i).exec(navigator.userAgent)?.[0] ?? (/Chrome\/\d+/i).exec(navigator.userAgent)?.[0] ?? 'Other', 'name')
+  }
+
   const statusSpan = document.getElementById('status_span')
   const statusBtn = document.getElementById('status_btn')
   const reloadBtn = document.getElementById('reload_btn')
@@ -238,8 +272,9 @@ const unbindGroups = async (ids) => {
   const tasksUl = document.getElementById('tasks_ul')
 
   const manageDialog = document.getElementById('manage_dialog')
-  const manageTable = document.getElementById('manage_table')
-  const joinForm = document.getElementById('join_form')
+  const manageTbody = document.getElementById('manage_tbody')
+  const nameText = document.getElementById('name_text')
+  const nameBtn = document.getElementById('name_btn')
   const joinText = document.getElementById('join_text')
   const joinBtn = document.getElementById('join_btn')
 
@@ -263,32 +298,48 @@ const unbindGroups = async (ids) => {
     statusSpan.style.color = 'green'
     statusBtn.textContent = 'unsubscribe'
     statusBtn.onclick = async (e) => {
-      await deleteDevice(sub)
+      const groups = await dbGetAll(GROUPS)
+      await unbindGroups(groups.map(g => g.gid))
+      await deleteDevice()
       await sub.unsubscribe()
+      window.location.reload()
     }
     await updateDevice(sub)
   }
 
   reloadBtn.onclick = (e) => window.location.reload()
   clearBtn.onclick = async (e) => {
-    while (tasksUl.firstChild)
-      tasksUl.removeChild(tasksUl.firstChild)
+    while (tasksUl.firstChild) tasksUl.removeChild(tasksUl.firstChild)
     await dbDeleteAll(TASKS)
   }
   manageBtn.onclick = async (e) => {
+    while (manageTbody.firstChild) manageTbody.removeChild(manageTbody.firstChild)
+    const groups = await dbGetAll(GROUPS)
+    groups.forEach(group => appendGroupTr(manageTbody, group))
     manageDialog.showModal()
   }
 
   const tasks = await dbGetAll(TASKS)
-  tasks.forEach(task => appendTaskLi(tasksUl, task.key, task.value))
-
-  const groups = await dbGetAll(GROUPS)
-  groups.forEach(group => appendGroupTr(manageTable, group.key, group.value))
+  tasks.forEach(task => appendTaskLi(tasksUl, task))
 
   manageDialog.onclick = async (e) => {
     if (e.target !== manageDialog) return
     const { left, top, height, width } = manageDialog.getBoundingClientRect()
     if (e.clientY < top || e.clientY > top + height || e.clientX < left || e.clientX > left + width)
       manageDialog.close()
+  }
+
+  nameText.value = await dbGet(KV, 'name')
+  nameBtn.onclick = async (e) => {
+    e.preventDefault()
+    await dbPut(KV, nameText.value, 'name')
+    manageDialog.close()
+  }
+
+  joinBtn.onclick = async (e) => {
+    e.preventDefault()
+    await bindGroups([joinText.value])
+    await dbAdd(GROUPS, { gid: joinText.value })
+    manageDialog.close()
   }
 })()

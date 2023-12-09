@@ -23,6 +23,7 @@
       border: none;
       border-radius: 2px;
       padding: 5px 10px;
+      width: 6em;
     }
 
     button:hover {
@@ -57,17 +58,30 @@
     <br />
     <ul id="tasks_ul"></ul>
     <dialog id="manage_dialog">
-      <table id="manage_table">
-        <tr>
-          <td colspan="2"><span style="font-weight:bold;">Group Binding</span></td>
-        </tr>
-        <tr>
-          <td>
-            <form id="join_form"><input id="join_text" type="text" autocomplete="off" required=""
-                style="width:100%;box-sizing:border-box;" /> </form>
-          </td>
-          <td><button id="join_btn" form="join_form">join</button></td>
-        </tr>
+      <table>
+        <thead>
+          <tr>
+            <td colspan="2"><span style="font-weight:bold;">• Device Name</span></td>
+          </tr>
+          <tr>
+            <td>
+              <form id="name_form"><input id="name_text" type="text" autocomplete="off" required=""
+                  style="width:100%;box-sizing:border-box;" /></form>
+            </td>
+            <td><button id="name_btn" form="name_form">save</button></td>
+          </tr>
+          <tr>
+            <td colspan="2"><span style="font-weight:bold;">• Group Binding</span></td>
+          </tr>
+          <tr>
+            <td>
+              <form id="join_form"><input id="join_text" type="text" autocomplete="off" required=""
+                  style="width:100%;box-sizing:border-box;" /></form>
+            </td>
+            <td><button id="join_btn" form="join_form">join</button></td>
+          </tr>
+        </thead>
+        <tbody id="manage_tbody"></tbody>
       </table>
     </dialog>
   </main>
