@@ -24,13 +24,18 @@
       border-radius: 2px;
       padding: 5px 10px;
       width: 6em;
+      cursor: pointer;
     }
 
-    button:hover {
+    button:disabled {
+      cursor: not-allowed;
+    }
+
+    button:hover:enabled {
       background-color: #d0d0d7;
     }
 
-    button:active {
+    button:active:enabled {
       background-color: #b1b1b9;
     }
 

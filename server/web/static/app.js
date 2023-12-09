@@ -121,6 +121,7 @@ const createElement = (tag, options = {}) => {
   const element = document.createElement(tag)
   Object.entries(options).forEach(([k, v]) => {
     if (k === 'text') element.textContent = v
+    else if (k === 'disabled') element.disabled = v
     else if (k === 'onclick') element.onclick = v
     else element.setAttribute(k, v)
   })
@@ -146,13 +147,12 @@ const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   li.appendChild(createElement('span', { style: 'font-weight:bold;', text: Type.toUpperCase() }))
   li.appendChild(createElement('span', { text: ` on ${dateStr(new Date(CTime))} ` }))
 
-  if (Type !== 'ping') {
-    li.appendChild(createElement('button', {
-      text: 'copy',
-      onclick: (e) => copyText(Type === 'link' ? Link : Text)
-    }))
-    li.appendChild(document.createTextNode(' '))
-  }
+  li.appendChild(createElement('button', {
+    text: 'copy',
+    disabled: Type === 'ping',
+    onclick: (e) => copyText(Type === 'link' ? Link : Text)
+  }))
+  li.appendChild(document.createTextNode(' '))
 
   li.appendChild(createElement('button', {
     text: 'delete', onclick: async (e) => {
@@ -300,6 +300,7 @@ const unbindGroups = async (ids) => {
     statusBtn.onclick = async (e) => {
       const groups = await dbGetAll(GROUPS)
       await unbindGroups(groups.map(g => g.gid))
+      await dbDeleteAll(GROUPS)
       await deleteDevice()
       await sub.unsubscribe()
       window.location.reload()
@@ -315,12 +316,12 @@ const unbindGroups = async (ids) => {
   manageBtn.onclick = async (e) => {
     while (manageTbody.firstChild) manageTbody.removeChild(manageTbody.firstChild)
     const groups = await dbGetAll(GROUPS)
-    groups.forEach(group => appendGroupTr(manageTbody, group))
+    groups.reverse().forEach(group => appendGroupTr(manageTbody, group))
     manageDialog.showModal()
   }
 
   const tasks = await dbGetAll(TASKS)
-  tasks.forEach(task => appendTaskLi(tasksUl, task))
+  tasks.reverse().forEach(task => appendTaskLi(tasksUl, task))
 
   manageDialog.onclick = async (e) => {
     if (e.target !== manageDialog) return
