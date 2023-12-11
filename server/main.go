@@ -41,7 +41,7 @@ func main() {
 		}
 	}()
 
-	osutil.WaitForInterrupt()
+	osutil.WaitForStop()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
