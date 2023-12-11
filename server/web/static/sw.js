@@ -43,6 +43,20 @@ self.addEventListener('notificationclick', event => {
 })
 
 // ========================= message received =========================
+const ESCAPE = {
+  '<': '&lt;',
+  '>': '&gt;',
+  '&': '&amp;',
+  '"': '&#34;',
+  '\'': '&#39;',
+  ' ': '&#160;'
+}
+const escapeBody = str => {
+  if (!(/Firefox\/\d+/i).test(navigator.userAgent)) return str
+
+  return str.replace(/[<>&"' ]/g, ch => ESCAPE[ch])
+}
+
 self.addEventListener('push', event => {
   console.log('push message received', event)
   const data = event.data?.json()
@@ -64,10 +78,10 @@ self.addEventListener('push', event => {
       Title = 'Ping'
       break
     case 'text':
-      options.body = Text
+      options.body = escapeBody(Text)
       break
     case 'link':
-      options.body = Link
+      options.body = escapeBody(Link)
       options.actions = [{ action: 'open', title: 'OPEN LINK' }]
       break
   }
