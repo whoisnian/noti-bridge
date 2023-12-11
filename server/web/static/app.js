@@ -98,17 +98,6 @@ const arrayBufferToB64 = (buffer) => {
   )
 }
 
-const ESCAPE = {
-  '<': '&lt;',
-  '>': '&gt;',
-  '&': '&amp;',
-  '"': '&#34;',
-  '\'': '&#39;',
-  ' ': '&nbsp;',
-  '\n': '<br />'
-}
-const htmlEscape = str => str.replace(/[<>&"' \n]/g, ch => ESCAPE[ch])
-
 const dateStr = (date) => `${date.getFullYear()}-` +
   `${('0' + (date.getMonth() + 1)).slice(-2)}-` +
   `${('0' + date.getDate()).slice(-2)} ` +
@@ -163,14 +152,14 @@ const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
   }))
 
   if (['link', 'text'].includes(Type) && Title.length > 0) {
-    li.appendChild(createElement('div', { text: htmlEscape(Title) }))
+    li.appendChild(createElement('div', { text: Title }))
   }
   if (Type === 'link') {
     const linkDiv = createElement('div')
-    linkDiv.appendChild(createElement('a', { href: Link, text: htmlEscape(Link) }))
+    linkDiv.appendChild(createElement('a', { href: Link, text: Link }))
     li.appendChild(linkDiv)
   } else if (Type === 'text') {
-    li.appendChild(createElement('div', { text: htmlEscape(Text) }))
+    li.appendChild(createElement('div', { text: Text }))
   }
 
   parent.appendChild(li)
