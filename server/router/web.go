@@ -22,13 +22,17 @@ func serveWebFile(store *httpd.Store, path string) {
 			store.W.WriteHeader(http.StatusNotFound)
 			return
 		}
-		global.LOG.Panic("web.FS.Open error", slog.Any("error", err), slog.String("tid", store.GetID()))
+		global.LOG.Error("web.FS.Open error", slog.Any("error", err), slog.String("tid", store.GetID()))
+		store.W.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	defer file.Close()
 
 	info, err := file.Stat()
 	if err != nil {
-		global.LOG.Panic("file.Stat error", slog.Any("error", err), slog.String("tid", store.GetID()))
+		global.LOG.Error("file.Stat error", slog.Any("error", err), slog.String("tid", store.GetID()))
+		store.W.WriteHeader(http.StatusInternalServerError)
+		return
 	} else if info.IsDir() {
 		store.W.WriteHeader(http.StatusForbidden)
 		return
@@ -44,7 +48,9 @@ func serveWebFile(store *httpd.Store, path string) {
 		store.W.Header().Set("Content-Length", strconv.FormatInt(info.Size(), 10))
 	}
 	if _, err := io.CopyN(store.W, file, info.Size()); err != nil {
-		global.LOG.Panic("io.CopyN failed", slog.Any("error", err), slog.String("tid", store.GetID()))
+		global.LOG.Error("io.CopyN failed", slog.Any("error", err), slog.String("tid", store.GetID()))
+		store.W.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
