@@ -1,1 +1,7 @@
-/go.work.sum
+# Ignore editor configuration
+.idea/
+.vscode/
+
+# Ignore directory of file with `-gitignore`
+**/*-gitignore/**
+**/*-gitignore

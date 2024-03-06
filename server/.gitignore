@@ -1,5 +1,16 @@
-/.config
-/.data
+# Ignore editor configuration
+.idea/
+.vscode/
 
-/main
-/noti-bridge
+# Ignore directory of file with `-gitignore`
+**/*-gitignore/**
+**/*-gitignore
+
+# Ignore build results
+output/
+main
+
+# Ignore config file
+.config/
+.data/
+config.json
