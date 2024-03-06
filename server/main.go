@@ -15,7 +15,10 @@ import (
 )
 
 func main() {
-	global.Setup()
+	global.SetupConfig()
+	global.SetupLogger()
+	global.LOG.Debugf("use config: %+v", global.CFG)
+
 	if global.CFG.Version {
 		fmt.Printf("%s %s(%s)\n", global.AppName, global.Version, global.BuildTime)
 		return
@@ -33,9 +36,9 @@ func main() {
 
 	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: router.Setup()}
 	go func() {
-		global.LOG.Infof("Service started: <http://%s>", global.CFG.ListenAddr)
+		global.LOG.Infof("service started: http://%s", global.CFG.ListenAddr)
 		if err := server.ListenAndServe(); errors.Is(err, http.ErrServerClosed) {
-			global.LOG.Warn("Service shutting down")
+			global.LOG.Warn("service shutting down")
 		} else if err != nil {
 			global.LOG.Fatal(err.Error())
 		}
