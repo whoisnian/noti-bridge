@@ -155,11 +155,11 @@ const appendTaskLi = (parent, { Type, Title, Text, Link, CTime, _id }) => {
     li.appendChild(createElement('div', { text: Title }))
   }
   if (Type === 'link') {
-    const linkDiv = createElement('div', { style: 'white-space:break-spaces;' })
+    const linkDiv = createElement('div', { style: 'white-space:break-spaces;word-break:break-all;' })
     linkDiv.appendChild(createElement('a', { href: Link, text: Link }))
     li.appendChild(linkDiv)
   } else if (Type === 'text') {
-    li.appendChild(createElement('div', { style: 'white-space:break-spaces;', text: Text }))
+    li.appendChild(createElement('div', { style: 'white-space:break-spaces;word-break:break-all;', text: Text }))
   }
 
   parent.appendChild(li)
